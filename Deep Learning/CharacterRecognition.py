@@ -149,12 +149,12 @@ def bias_variable(shape):
 def main(_):
     # Import data
     image_train, label_train = tfrecord.read_and_decode(
-        "D:/final work/FinalWork-Ms.Wu/Project/character train.tfrecords")
+        "D:/final work/FinalWork-Ms.Wu/Project/character train.tfrecords", tfrecord.Character)
     image_train_batch, label_train_batch = tf.train.shuffle_batch(
         [image_train, label_train], batch_size=BATCH_SIZE, capacity=CAPACITY, min_after_dequeue=500, num_threads=1)
 
     image_test, label_test = tfrecord.read_and_decode(
-        "D:/final work/FinalWork-Ms.Wu/Project/character test.tfrecords")
+        "D:/final work/FinalWork-Ms.Wu/Project/character test.tfrecords", tfrecord.Character)
     image_test_batch, label_test_batch = tf.train.shuffle_batch(
         [image_test, label_test], batch_size=BATCH_SIZE, capacity=CAPACITY, min_after_dequeue=500, num_threads=1)
 

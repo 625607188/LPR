@@ -1,0 +1,107 @@
+# -*- coding: utf-8 -*-
+
+# Form implementation generated from reading ui file 'D:\final work\FinalWork-Ms.Wu\Project\Gui\车牌识别调试窗口.ui'
+#
+# Created by: PyQt5 UI code generator 5.10
+#
+# WARNING! All changes made in this file will be lost!
+
+from PyQt5 import QtCore, QtGui, QtWidgets
+
+class Ui_MainWindow(object):
+    def setupUi(self, MainWindow):
+        MainWindow.setObjectName("MainWindow")
+        MainWindow.resize(398, 417)
+        self.centralWidget = QtWidgets.QWidget(MainWindow)
+        self.centralWidget.setObjectName("centralWidget")
+        self.Photo_widget = QtWidgets.QWidget(self.centralWidget)
+        self.Photo_widget.setGeometry(QtCore.QRect(50, 30, 311, 91))
+        self.Photo_widget.setObjectName("Photo_widget")
+        self.pushButton = QtWidgets.QPushButton(self.Photo_widget)
+        self.pushButton.setGeometry(QtCore.QRect(200, 20, 91, 23))
+        self.pushButton.setObjectName("pushButton")
+        self.Photo = QtWidgets.QLabel(self.Photo_widget)
+        self.Photo.setGeometry(QtCore.QRect(40, 30, 121, 31))
+        self.Photo.setText("")
+        self.Photo.setScaledContents(True)
+        self.Photo.setOpenExternalLinks(True)
+        self.Photo.setObjectName("Photo")
+        self.Char_widget = QtWidgets.QWidget(self.centralWidget)
+        self.Char_widget.setGeometry(QtCore.QRect(50, 160, 311, 81))
+        self.Char_widget.setObjectName("Char_widget")
+        self.label_text1 = QtWidgets.QLabel(self.Char_widget)
+        self.label_text1.setGeometry(QtCore.QRect(10, 10, 91, 16))
+        self.label_text1.setObjectName("label_text1")
+        self.layoutWidget = QtWidgets.QWidget(self.Char_widget)
+        self.layoutWidget.setGeometry(QtCore.QRect(10, 30, 291, 41))
+        self.layoutWidget.setObjectName("layoutWidget")
+        self.horizontalLayout = QtWidgets.QHBoxLayout(self.layoutWidget)
+        self.horizontalLayout.setContentsMargins(0, 0, 0, 0)
+        self.horizontalLayout.setObjectName("horizontalLayout")
+        self.Char0 = QtWidgets.QLabel(self.layoutWidget)
+        self.Char0.setText("")
+        self.Char0.setScaledContents(True)
+        self.Char0.setObjectName("Char0")
+        self.horizontalLayout.addWidget(self.Char0)
+        self.Char1 = QtWidgets.QLabel(self.layoutWidget)
+        self.Char1.setText("")
+        self.Char1.setScaledContents(True)
+        self.Char1.setObjectName("Char1")
+        self.horizontalLayout.addWidget(self.Char1)
+        self.Char2 = QtWidgets.QLabel(self.layoutWidget)
+        self.Char2.setText("")
+        self.Char2.setScaledContents(True)
+        self.Char2.setObjectName("Char2")
+        self.horizontalLayout.addWidget(self.Char2)
+        self.Char3 = QtWidgets.QLabel(self.layoutWidget)
+        self.Char3.setText("")
+        self.Char3.setScaledContents(True)
+        self.Char3.setObjectName("Char3")
+        self.horizontalLayout.addWidget(self.Char3)
+        self.Char4 = QtWidgets.QLabel(self.layoutWidget)
+        self.Char4.setText("")
+        self.Char4.setScaledContents(True)
+        self.Char4.setObjectName("Char4")
+        self.horizontalLayout.addWidget(self.Char4)
+        self.Char5 = QtWidgets.QLabel(self.layoutWidget)
+        self.Char5.setText("")
+        self.Char5.setScaledContents(True)
+        self.Char5.setObjectName("Char5")
+        self.horizontalLayout.addWidget(self.Char5)
+        self.Char6 = QtWidgets.QLabel(self.layoutWidget)
+        self.Char6.setText("")
+        self.Char6.setScaledContents(True)
+        self.Char6.setObjectName("Char6")
+        self.horizontalLayout.addWidget(self.Char6)
+        self.Result_widget = QtWidgets.QWidget(self.centralWidget)
+        self.Result_widget.setGeometry(QtCore.QRect(50, 280, 311, 91))
+        self.Result_widget.setObjectName("Result_widget")
+        self.label_text2 = QtWidgets.QLabel(self.Result_widget)
+        self.label_text2.setGeometry(QtCore.QRect(10, 10, 61, 16))
+        self.label_text2.setObjectName("label_text2")
+        self.result = QtWidgets.QTextEdit(self.Result_widget)
+        self.result.setGeometry(QtCore.QRect(90, 40, 104, 31))
+        self.result.setObjectName("result")
+        MainWindow.setCentralWidget(self.centralWidget)
+
+        self.retranslateUi(MainWindow)
+        self.pushButton.clicked.connect(MainWindow.getimage)
+        QtCore.QMetaObject.connectSlotsByName(MainWindow)
+
+    def retranslateUi(self, MainWindow):
+        _translate = QtCore.QCoreApplication.translate
+        MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
+        self.pushButton.setText(_translate("MainWindow", "加载车牌图片"))
+        self.label_text1.setText(_translate("MainWindow", "车牌字符分割："))
+        self.label_text2.setText(_translate("MainWindow", "识别结果："))
+
+
+if __name__ == "__main__":
+    import sys
+    app = QtWidgets.QApplication(sys.argv)
+    MainWindow = QtWidgets.QMainWindow()
+    ui = Ui_MainWindow()
+    ui.setupUi(MainWindow)
+    MainWindow.show()
+    sys.exit(app.exec_())
+

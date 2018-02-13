@@ -8,7 +8,7 @@ import tempfile
 
 
 BATCH_SIZE = 5000                    # 一个训练batch中的训练数据个数。数字越小时，训练过程越接近
-CAPACITY = 10000 + 3 * BATCH_SIZE
+CAPACITY = 10000 + 2 * BATCH_SIZE
 
 # 配置神经网络的参数。
 INPUT_NODE = 20*20
@@ -106,7 +106,8 @@ def deepnn(x):
         b_fc2 = bias_variable([NUM_LABLES])
 
         y_conv = tf.matmul(h_fc1_drop, W_fc2) + b_fc2
-        return y_conv, keep_prob
+
+    return y_conv, keep_prob
 
 
 # tf.nn.conv2d 提供了一个非常方便的函数来实现卷积层前向传播算法。这个函数的第一个输
@@ -158,12 +159,10 @@ def main(_):
         [image_test, label_test], batch_size=BATCH_SIZE, capacity=CAPACITY, min_after_dequeue=500, num_threads=1)
 
     # 定义神经网络的输入。
-    x = tf.placeholder(
-        tf.float32, [None, INPUT_NODE], name='x-input')
+    x = tf.placeholder(tf.float32, [None, INPUT_NODE], name='x-input')
 
     # 定义神经网络的输出。
-    y_ = tf.placeholder(
-        tf.float32, [None, OUTPUT_NODE], name='y-input')
+    y_ = tf.placeholder(tf.float32, [None, OUTPUT_NODE], name='y-input')
 
     # 调用卷积神经网络。
     y_conv, keep_prob = deepnn(x)
@@ -177,7 +176,10 @@ def main(_):
     with tf.name_scope('adam_optimizer'):
         global_step = tf.Variable(0)
         learning_rate = tf.train.exponential_decay(
-            learning_rate=1e-5, global_step=global_step, decay_steps=1000, decay_rate=0.98,
+            learning_rate=1e-4,
+            global_step=global_step,
+            decay_steps=200,
+            decay_rate=0.98,
             staircase=True)
         train_step = tf.train.AdamOptimizer(learning_rate).minimize(cross_entropy_mean,
                                                                     global_step=global_step)
@@ -186,11 +188,6 @@ def main(_):
         correct_prediction = tf.equal(tf.argmax(y_conv, 1), tf.argmax(y_, 1))
         correct_prediction = tf.cast(correct_prediction, tf.float32)
     accuracy = tf.reduce_mean(correct_prediction)
-
-    graph_location = tempfile.mkdtemp()
-    print('Saving graph to: %s' % graph_location)
-    train_writer = tf.summary.FileWriter(graph_location)
-    train_writer.add_graph(tf.get_default_graph())
 
     config = tf.ConfigProto()
     config.gpu_options.allow_growth = True
@@ -204,8 +201,7 @@ def main(_):
             # 加载模型。
             saver.restore(sess, ckpt.model_checkpoint_path)
             # 通过文件名得到模型保存时迭代的轮数。
-            global_step = int(ckpt.model_checkpoint_path\
-                              .split('/')[-1].split('-')[-1])
+            global_step = int(ckpt.model_checkpoint_path.split('/')[-1].split('-')[-1])
             print("Loading success, global_step is %d " % global_step)
         else:
             global_step = 0
@@ -234,4 +230,4 @@ def main(_):
 
 
 if __name__ == '__main__':
-  tf.app.run(main=main, argv=[sys.argv[0]])
+    tf.app.run(main=main, argv=[sys.argv[0]])

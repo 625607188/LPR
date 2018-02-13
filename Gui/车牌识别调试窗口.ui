@@ -6,29 +6,29 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>398</width>
-    <height>417</height>
+    <width>360</width>
+    <height>232</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>MainWindow</string>
+   <string>车牌识别系统</string>
   </property>
   <widget class="QWidget" name="centralWidget">
    <widget class="QWidget" name="Photo_widget" native="true">
     <property name="geometry">
      <rect>
-      <x>50</x>
-      <y>30</y>
+      <x>20</x>
+      <y>20</y>
       <width>311</width>
-      <height>91</height>
+      <height>61</height>
      </rect>
     </property>
     <widget class="QPushButton" name="pushButton">
      <property name="geometry">
       <rect>
-       <x>200</x>
+       <x>220</x>
        <y>20</y>
-       <width>91</width>
+       <width>80</width>
        <height>23</height>
       </rect>
      </property>
@@ -40,9 +40,9 @@
      <property name="geometry">
       <rect>
        <x>40</x>
-       <y>30</y>
-       <width>121</width>
-       <height>31</height>
+       <y>10</y>
+       <width>136</width>
+       <height>36</height>
       </rect>
      </property>
      <property name="text">
@@ -59,8 +59,8 @@
    <widget class="QWidget" name="Char_widget" native="true">
     <property name="geometry">
      <rect>
-      <x>50</x>
-      <y>160</y>
+      <x>20</x>
+      <y>80</y>
       <width>311</width>
       <height>81</height>
      </rect>
@@ -164,34 +164,33 @@
    <widget class="QWidget" name="Result_widget" native="true">
     <property name="geometry">
      <rect>
-      <x>50</x>
-      <y>280</y>
+      <x>20</x>
+      <y>160</y>
       <width>311</width>
-      <height>91</height>
+      <height>51</height>
      </rect>
     </property>
-    <widget class="QLabel" name="label_text2">
+    <widget class="QWidget" name="layoutWidget">
      <property name="geometry">
       <rect>
        <x>10</x>
        <y>10</y>
-       <width>61</width>
-       <height>16</height>
+       <width>291</width>
+       <height>73</height>
       </rect>
      </property>
-     <property name="text">
-      <string>识别结果：</string>
-     </property>
-    </widget>
-    <widget class="QTextEdit" name="result">
-     <property name="geometry">
-      <rect>
-       <x>90</x>
-       <y>40</y>
-       <width>104</width>
-       <height>31</height>
-      </rect>
-     </property>
+     <layout class="QHBoxLayout" name="horizontalLayout_3">
+      <item>
+       <widget class="QLabel" name="label_text2">
+        <property name="text">
+         <string>识别结果：</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QTextEdit" name="result"/>
+      </item>
+     </layout>
     </widget>
    </widget>
   </widget>

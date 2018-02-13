@@ -5,22 +5,22 @@ from PyQt5.QtWidgets import *
 import cv2
 from Ui_车牌识别调试窗口 import Ui_MainWindow
 
-sys.path.append('D:/final work/FinalWork-Ms.Wu/Project/Deep Learning/')
+sys.path.append('../Deep Learning/')
 from eval import *
+
 
 class MainWindow(QMainWindow,  Ui_MainWindow):
     def __init__(self,  parent=None):
         super(MainWindow,  self).__init__(parent)
         self.setupUi(self)
-        
     
     def getimage(self):
         image_path,  _ = QFileDialog.getOpenFileName(self,  "打开图片",  "",  "Image file (*jpg)")
-        image = QPixmap(image_path)
-        self.Photo.setPixmap(image)
-        self.getcharacter(image_path)
-        self.getresult(image_path)
-
+        if image_path:
+            image = QPixmap(image_path)
+            self.Photo.setPixmap(image)
+            self.getcharacter(image_path)
+            self.getresult(image_path)
 
     def getcharacter(self, image_path):
         section, para = image_to_character(image_path)
@@ -63,8 +63,7 @@ class MainWindow(QMainWindow,  Ui_MainWindow):
             
         if path:
             os.remove(path)
-            
-            
+
     def getresult(self, image_path):
         result = evaluate_one_image(image_path)
         self.result.setText(result)

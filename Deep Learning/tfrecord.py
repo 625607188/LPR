@@ -33,6 +33,7 @@ def create_record(CharacterOrLicense, TrainOrTest):
     temp = ""
     path = ""
     if CharacterOrLicense == Character:
+        classes = character_classes
         label = character_label
         if TrainOrTest == Train:
             temp = "train"
@@ -124,9 +125,9 @@ def read_and_decode(filename, CharacterOrLicense):
 
 def main(argv=None):
     create_record(Character, Train)
-    create_record(Character, Test)
+    '''create_record(Character, Test)
     create_record(License, Train)
-    create_record(License, Test)
+    create_record(License, Test)'''
     '''image, label = read_and_decode("E:/iCloudDrive/车牌识别-python/train.tfrecords")
     image_batch, label_batch = tf.train.shuffle_batch(
         [image, label], batch_size=5, capacity=train.CAPACITY, min_after_dequeue=100, num_threads=1)

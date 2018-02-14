@@ -169,7 +169,7 @@ def main(_):
 
     # 定义交叉熵损失函数。
     with tf.name_scope('loss'):
-        cross_entropy = tf.nn.softmax_cross_entropy_with_logits(labels=y_, logits=y_conv)
+        cross_entropy = tf.nn.softmax_cross_entropy_with_logits_v2(labels=y_, logits=y_conv)
     cross_entropy_mean = tf.reduce_mean(cross_entropy)
 
     # 设置指数衰减学习率。学习率 = learning_rate * decay_rate^(global_step/decay_steps)

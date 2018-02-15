@@ -11,7 +11,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
-        MainWindow.resize(360, 232)
+        MainWindow.resize(360, 203)
         self.centralWidget = QtWidgets.QWidget(MainWindow)
         self.centralWidget.setObjectName("centralWidget")
         self.Photo_widget = QtWidgets.QWidget(self.centralWidget)
@@ -74,10 +74,10 @@ class Ui_MainWindow(object):
         self.Char6.setObjectName("Char6")
         self.horizontalLayout.addWidget(self.Char6)
         self.Result_widget = QtWidgets.QWidget(self.centralWidget)
-        self.Result_widget.setGeometry(QtCore.QRect(20, 160, 311, 51))
+        self.Result_widget.setGeometry(QtCore.QRect(20, 160, 311, 31))
         self.Result_widget.setObjectName("Result_widget")
         self.layoutWidget1 = QtWidgets.QWidget(self.Result_widget)
-        self.layoutWidget1.setGeometry(QtCore.QRect(10, 10, 291, 73))
+        self.layoutWidget1.setGeometry(QtCore.QRect(10, 0, 291, 31))
         self.layoutWidget1.setObjectName("layoutWidget1")
         self.horizontalLayout_3 = QtWidgets.QHBoxLayout(self.layoutWidget1)
         self.horizontalLayout_3.setContentsMargins(0, 0, 0, 0)

@@ -25,6 +25,13 @@ class MainWindow(QMainWindow,  Ui_MainWindow):
     def getcharacter(self, image_path):
         section, para = image_to_character(image_path)
         path = ""
+        self.Char0.clear()
+        self.Char1.clear()
+        self.Char2.clear()
+        self.Char3.clear()
+        self.Char4.clear()
+        self.Char5.clear()
+        self.Char6.clear()
         if 0 < section :
             path = "C:/Users/Hao/Desktop/temp/0.jpg"
             cv2.imwrite(path,  para[0])

@@ -46,7 +46,7 @@ def image_to_character(image_path):
         line[i] = 0
         for l in range(x):
             line[i] += image[l][i]
-        if (line[i] < 500) and (top != None):
+        if (line[i] < 300) and (top != None):
             bottom = i - 1
             for m in range(x):
                 para[section].append(image[m][top:bottom])

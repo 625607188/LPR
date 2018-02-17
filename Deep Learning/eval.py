@@ -1,16 +1,10 @@
 # -*- coding: utf-8 -*-
 import cv2
-import time
 import tensorflow as tf
 import numpy as np
 import matplotlib.pyplot as plt
 from PIL import Image
-import os
 # 加载inference.py和train.py中定义的常量和函数。
-import inference
-import train
-import tfrecord
-import CharacterRecognition
 
 IMAGE_PATH = "C:/Users/Hao/Desktop/train/ann/Q/50.jpg"
 
@@ -56,15 +50,6 @@ def image_to_character(image_path):
         elif (line[i] > 300) and (top == None):
             top = i
 
-
-
-    '''l = 0
-    for i in range(section):
-        if len(para[section - 1 - i][0]) < 5:
-            del para[section - 1 - i]
-            l += 1
-    section -= l'''
-
     '''for i in range(section):
         plt.subplot(4, 4, i + 1), plt.imshow(para[i])
     plt.show()'''
@@ -81,9 +66,6 @@ def image_to_character(image_path):
     section = section - l
 
     image = para
-
-    '''del image[2]
-    section = section - 1'''
 
     return section, image
 

@@ -56,6 +56,14 @@ def image_to_character(image_path):
         elif (line[i] > 300) and (top == None):
             top = i
 
+    l = 0
+    for i in range(section):
+        temp = np.array(para[section - i - 1]).sum()
+        if temp < 5000:
+            del para[section - i - 1]
+            l = l + 1
+    section = section - l
+
     '''l = 0
     for i in range(section):
         if len(para[section - 1 - i][0]) < 5:
@@ -72,8 +80,8 @@ def image_to_character(image_path):
 
     image = para
 
-    del image[2]
-    section = section - 1
+    '''del image[2]
+    section = section - 1'''
 
     return section, image
 
@@ -154,14 +162,12 @@ def evaluate_one_image(image_path):
         with tf.Session() as sess:
             tf.global_variables_initializer().run()
             print("Reading checkpoints...")
-            ckpt = tf.train.get_checkpoint_state(
-                CharacterRecognition.MODEL_SAVE_PATH)
+            ckpt = tf.train.get_checkpoint_state(CharacterRecognition.MODEL_SAVE_PATH)
             if ckpt and ckpt.model_checkpoint_path:
                 # 加载模型。
                 saver.restore(sess, ckpt.model_checkpoint_path)
                 # 通过文件名得到模型保存时迭代的轮数。
-                global_step = ckpt.model_checkpoint_path\
-                    .split('/')[-1].split('-')[-1]
+                global_step = ckpt.model_checkpoint_path.split('/')[-1].split('-')[-1]
                 print("Loading success, global_step is %s " % global_step)
                 for i in range(section):
                     xs = sess.run([para[i]])

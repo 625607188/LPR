@@ -56,13 +56,7 @@ def image_to_character(image_path):
         elif (line[i] > 300) and (top == None):
             top = i
 
-    l = 0
-    for i in range(section):
-        temp = np.array(para[section - i - 1]).sum()
-        if temp < 5000:
-            del para[section - i - 1]
-            l = l + 1
-    section = section - l
+
 
     '''l = 0
     for i in range(section):
@@ -77,6 +71,14 @@ def image_to_character(image_path):
 
     for i in range(section):
         para[i] = np.array(para[i]).reshape(x, -1)
+
+    l = 0
+    for i in range(section):
+        temp = para[section - i - 1].sum()
+        if temp < 5000:
+            del para[section - i - 1]
+            l = l + 1
+    section = section - l
 
     image = para
 

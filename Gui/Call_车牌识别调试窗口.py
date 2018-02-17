@@ -15,7 +15,7 @@ class MainWindow(QMainWindow,  Ui_MainWindow):
         self.setupUi(self)
     
     def getimage(self):
-        image_path,  _ = QFileDialog.getOpenFileName(self,  "打开图片",  "",  "Image file (*jpg)")
+        image_path,  _ = QFileDialog.getOpenFileName(self,  "打开图片",  "../Train/svm/has/train/",  "Image file (*jpg)")
         if image_path:
             image = QPixmap(image_path)
             self.Photo.setPixmap(image)

@@ -3,7 +3,6 @@ import cv2
 import time
 import tensorflow as tf
 import numpy as np
-import matplotlib
 import matplotlib.pyplot as plt
 from PIL import Image
 import os
@@ -18,13 +17,14 @@ IMAGE_PATH = "C:/Users/Hao/Desktop/train/ann/Q/50.jpg"
 
 def image_to_character(image_path):
     img = cv2.imread(image_path, 0)
-    blur = cv2.GaussianBlur(img, (5, 5), 0)
-    ret3, image = cv2.threshold(blur, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
-    image = cv2.equalizeHist(image)
+    blur = img
+    #blur = cv2.GaussianBlur(img, (5, 5), 0)                                                 # 高斯模糊处理
+    ret3, image = cv2.threshold(blur, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)          # 二值化处理
+    image = cv2.equalizeHist(image)                                                         # 均值化处理
 
     (x, y) = image.shape
 
-    image = list(image)
+    image = list(image)                             # 行处理
     line = [0] * x
     sum = 0
     for i in range(x):
@@ -33,11 +33,11 @@ def image_to_character(image_path):
         sum += line[i]
 
     for i in range(x):
-        if line[x - i - 1] < (sum / x / x):
+        if line[x - i - 1] < (sum / x /2):
             del image[x - i - 1]
     image = np.array(image)
 
-    (x, y) = image.shape
+    (x, y) = image.shape                            # 列处理
     line = [0] * y
     para = [[]]
     section = 0
@@ -47,28 +47,33 @@ def image_to_character(image_path):
         for l in range(x):
             line[i] += image[l][i]
         if (line[i] < 300) and (top != None):
-            bottom = i - 1
+            bottom = i
             for m in range(x):
                 para[section].append(image[m][top:bottom])
             para.append([])
             section += 1
             top = None
-        elif (line[i] > 500) and (top == None):
+        elif (line[i] > 300) and (top == None):
             top = i
 
-    l = 0
+    '''l = 0
     for i in range(section):
         if len(para[section - 1 - i][0]) < 5:
             del para[section - 1 - i]
             l += 1
-    section -= l
+    section -= l'''
 
     '''for i in range(section):
-        plt.subplot(4, 4, i + 1), plt.imshow(para[i])'''
-    image = para
+        plt.subplot(4, 4, i + 1), plt.imshow(para[i])
+    plt.show()'''
 
     for i in range(section):
         para[i] = np.array(para[i]).reshape(x, -1)
+
+    image = para
+
+    del image[2]
+    section = section - 1
 
     return section, image
 
@@ -168,8 +173,6 @@ def evaluate_one_image(image_path):
                     print(tfrecord.character_classes[prediction])
             else:
                 print('No checkpoint file found')
-
-        plt.show()
     return result
 
 
@@ -182,3 +185,4 @@ def main(argv=None):
 
 if __name__ == '__main__':
     tf.app.run()
+

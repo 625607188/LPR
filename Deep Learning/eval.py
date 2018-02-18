@@ -5,6 +5,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 from PIL import Image
 # 加载inference.py和train.py中定义的常量和函数。
+import CharacterRecognition
+import inference
+import tfrecord
 
 IMAGE_PATH = "C:/Users/Hao/Desktop/train/ann/Q/50.jpg"
 
@@ -12,7 +15,6 @@ IMAGE_PATH = "C:/Users/Hao/Desktop/train/ann/Q/50.jpg"
 def image_to_character(image_path):
     img = cv2.imread(image_path, 0)
     blur = img
-    #blur = cv2.GaussianBlur(img, (5, 5), 0)                                                 # 高斯模糊处理
     ret3, image = cv2.threshold(blur, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)          # 二值化处理
     image = cv2.equalizeHist(image)                                                         # 均值化处理
 
@@ -78,7 +80,7 @@ def evaluate_one_character(image_path):
         x = tf.placeholder(
             tf.float32, [None, inference.INPUT_NODE], name='x-input')
         # 直接使用inference.py中定义的前向传播过程。
-        y_conv, keep_prob = deep.deepnn(x)
+        y_conv, keep_prob = CharacterRecognition.deepnn(x)
         y_soft = tf.nn.softmax(y_conv)
         pre = tf.argmax(y_soft, 1)
 
@@ -89,7 +91,7 @@ def evaluate_one_character(image_path):
             tf.global_variables_initializer().run()
             print("Reading checkpoints...")
             ckpt = tf.train.get_checkpoint_state(
-                train.MODEL_SAVE_PATH)
+                CharacterRecognition.MODEL_SAVE_PATH)
             if ckpt and ckpt.model_checkpoint_path:
                 # 加载模型。
                 saver.restore(sess, ckpt.model_checkpoint_path)
@@ -166,12 +168,11 @@ def evaluate_one_image(image_path):
     return result
 
 
-def main(argv=None):
+def main(argv = None):
     for i in range(1917):
         path = "C:/Users/Hao/Desktop/test/" + str(i) + ".jpg"
         image = evaluate_one_image(path)
         
-
 
 if __name__ == '__main__':
     tf.app.run()

@@ -40,6 +40,7 @@ def deepnn(x):
     # 表示图片的深度。当参数为-1时，根据剩下的维度计算出数组的另外一个shape属性值。
     with tf.name_scope('reshape'):
         x_image = tf.reshape(x, [-1, IMAGE_SIZE, IMAGE_SIZE, NUM_CHANNELS])
+        tf.summary.histogram('reshape', x_image)
 
     # 声明第一层卷积层的前向传播过程。定义的卷积层输入为20*20*1的图像像素。因为卷积
     # 层中使用了全0填充，所以输出为20*20*32。
@@ -50,11 +51,16 @@ def deepnn(x):
         # 使用边长为5，深度为32的过滤器，过滤器移动的步长为1，且使用全0填充。
         h_conv1 = tf.nn.relu(conv2d(x_image, W_conv1) + b_conv1)
 
+        tf.summary.histogram('W_conv1', W_conv1)
+        tf.summary.histogram('b_conv1', b_conv1)
+        tf.summary.histogram('h_conv1', h_conv1)
+
     # 声明第二层池化层的前向传播过程。这里选用最大池化层，池化层过滤器的边长为2，
     # 使用全0填充且移动的步长为2。这一层的输入是上一层的输出，也就是20*20*32的矩
     # 阵。输出为10*10*32的矩阵。
     with tf.name_scope('layer2-pool1'):
         h_pool1 = max_pool_2x2(h_conv1)
+        tf.summary.histogram('h_pool1', h_pool1)
 
     # 声明第三层卷积层的变量并实现前向传播过程。这一层的输入为10*10*32的矩阵。输
     # 出为10*10*64的矩阵。
@@ -65,10 +71,15 @@ def deepnn(x):
         # 使用边长为5，深度为64的过滤器，过滤器的步长为1，且使用全0填充。
         h_conv2 = tf.nn.relu(conv2d(h_pool1, W_conv2) + b_conv2)
 
+        tf.summary.histogram('W_conv2', W_conv2)
+        tf.summary.histogram('b_conv2', b_conv2)
+        tf.summary.histogram('h_conv2', h_conv2)
+
     # 实现第四层池化层的前向传播过程。这一层和第三层的结构是一样的。这一层的输入
     # 为10*10*64的矩阵，输出为5*5*64的矩阵。
     with tf.name_scope('layer4-pool2'):
         h_pool2 = max_pool_2x2(h_conv2)
+        tf.summary.histogram('h_pool2', h_conv2)
 
     # 将第四层池化层的输出转化为第五层全连接层的输入格式。第四层的输出为为5*5*64
     # 的矩阵，然而第五层全连接层需要的输入格式为向量，所以在这里需要将这个5*5*64
@@ -92,11 +103,17 @@ def deepnn(x):
 
         h_fc1 = tf.nn.relu(tf.matmul(reshaped, W_fc1) + b_fc1)
 
+        tf.summary.histogram('W_fc1', W_fc1)
+        tf.summary.histogram('b_fc1', b_fc1)
+        tf.summary.histogram('h_fc1', h_fc1)
+
     # 引入了dropout的概念。dropout在训练时会随机将部分节点的输出改为0。dropout可以
     # 避免过拟合问题，从而使得模型在测试数据上的效果更好。
     with tf.name_scope('dropout'):
         keep_prob = tf.placeholder(tf.float32)
         h_fc1_drop = tf.nn.dropout(h_fc1, keep_prob)
+
+        tf.summary.histogram('h_fc1_drop', h_fc1_drop)
 
     # 声明第六层全连接层的变量并实现前向传播过程。这一层的输入为一组长度为1024的向
     # 量，输出为一组长度为2的向量。这一层的输出通过softmax之后就得到了最后的分类结
@@ -106,6 +123,10 @@ def deepnn(x):
         b_fc2 = bias_variable([NUM_LABLES])
 
         y_conv = tf.matmul(h_fc1_drop, W_fc2) + b_fc2
+
+        tf.summary.histogram('W_fc2', W_fc2)
+        tf.summary.histogram('b_fc2', b_fc2)
+        tf.summary.histogram('y_conv', y_conv)
 
     return y_conv, keep_prob
 
@@ -146,7 +167,7 @@ def bias_variable(shape):
     return tf.Variable(initial)
 
 
-def main(_):
+def main(argv=[sys.argv[0]]):
     # Import data
     image_train, label_train = tfrecord.read_and_decode(
         "D:/final work/FinalWork-Ms.Wu/Project/character train.tfrecords", tfrecord.Character)
@@ -170,7 +191,8 @@ def main(_):
     # 定义交叉熵损失函数。
     with tf.name_scope('loss'):
         cross_entropy = tf.nn.softmax_cross_entropy_with_logits_v2(labels=y_, logits=y_conv)
-    cross_entropy_mean = tf.reduce_mean(cross_entropy)
+        cross_entropy_mean = tf.reduce_mean(cross_entropy)
+        tf.summary.histogram('loss', cross_entropy_mean)
 
     # 设置指数衰减学习率。学习率 = learning_rate * decay_rate^(global_step/decay_steps)
     with tf.name_scope('adam_optimizer'):
@@ -181,13 +203,14 @@ def main(_):
             decay_steps=200,
             decay_rate=0.98,
             staircase=True)
-        train_step = tf.train.AdamOptimizer(learning_rate).minimize(cross_entropy_mean,
-                                                                    global_step=global_step)
+        train_step = tf.train.AdamOptimizer(learning_rate).minimize(cross_entropy_mean, global_step=global_step)
+        tf.summary.histogram('learning_rate', learning_rate)
 
     with tf.name_scope('accuracy'):
         correct_prediction = tf.equal(tf.argmax(y_conv, 1), tf.argmax(y_, 1))
         correct_prediction = tf.cast(correct_prediction, tf.float32)
-    accuracy = tf.reduce_mean(correct_prediction)
+        accuracy = tf.reduce_mean(correct_prediction)
+        tf.summary.histogram('accuracy', accuracy)
 
     config = tf.ConfigProto()
     config.gpu_options.allow_growth = True
@@ -197,6 +220,8 @@ def main(_):
         coord = tf.train.Coordinator()
         threads = tf.train.start_queue_runners(sess=sess, coord=coord)
         ckpt = tf.train.get_checkpoint_state(MODEL_SAVE_PATH)
+        writer = tf.summary.FileWriter('../Logs', sess.graph)
+        merged = tf.summary.merge_all()
         if ckpt and ckpt.model_checkpoint_path:
             # 加载模型。
             saver.restore(sess, ckpt.model_checkpoint_path)
@@ -218,13 +243,15 @@ def main(_):
                     saver.save(
                         sess, os.path.join(MODEL_SAVE_PATH, MODEL_NAME),
                         global_step=global_step)
-                _, test_accuracy = sess.run([train_step, accuracy], feed_dict={
+                _, test_accuracy, summary = sess.run([train_step, accuracy, merged], feed_dict={
                     x: xs, y_: ys, keep_prob: 0.5})
+                writer.add_summary(summary, global_step)
                 print('test accuracy %g' % test_accuracy)
         except tf.errors.OutOfRangeError as e:
             coord.request_stop(e)
             print('Done training -- epoch limit reached')
         finally:
+            writer.close()
             coord.request_stop()
             coord.join(threads)
 

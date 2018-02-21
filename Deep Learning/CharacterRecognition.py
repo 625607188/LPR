@@ -27,7 +27,7 @@ CONV2_SIZE = 5
 # 全连接层的节点个数。
 FC_SIZE = 1024
 
-MODEL_SAVE_PATH = "D:/final work/FinalWork-Ms.Wu/Project/Model/character/"
+MODEL_SAVE_PATH = "../Model/character/"
 MODEL_NAME = "model.kpt"
 
 
@@ -40,7 +40,7 @@ def deepnn(x):
     # 表示图片的深度。当参数为-1时，根据剩下的维度计算出数组的另外一个shape属性值。
     with tf.name_scope('reshape'):
         x_image = tf.reshape(x, [-1, IMAGE_SIZE, IMAGE_SIZE, NUM_CHANNELS])
-        tf.summary.histogram('reshape', x_image)
+        tf.summary.image('input', x_image, 35)
 
     # 声明第一层卷积层的前向传播过程。定义的卷积层输入为20*20*1的图像像素。因为卷积
     # 层中使用了全0填充，所以输出为20*20*32。
@@ -111,9 +111,8 @@ def deepnn(x):
     # 避免过拟合问题，从而使得模型在测试数据上的效果更好。
     with tf.name_scope('dropout'):
         keep_prob = tf.placeholder(tf.float32)
+        tf.summary.scalar('keep_prob', keep_prob)
         h_fc1_drop = tf.nn.dropout(h_fc1, keep_prob)
-
-        tf.summary.histogram('h_fc1_drop', h_fc1_drop)
 
     # 声明第六层全连接层的变量并实现前向传播过程。这一层的输入为一组长度为1024的向
     # 量，输出为一组长度为2的向量。这一层的输出通过softmax之后就得到了最后的分类结
@@ -170,12 +169,12 @@ def bias_variable(shape):
 def main(argv=[sys.argv[0]]):
     # Import data
     image_train, label_train = tfrecord.read_and_decode(
-        "D:/final work/FinalWork-Ms.Wu/Project/character train.tfrecords", tfrecord.Character)
+        "../character train.tfrecords", tfrecord.Character)
     image_train_batch, label_train_batch = tf.train.shuffle_batch(
         [image_train, label_train], batch_size=BATCH_SIZE, capacity=CAPACITY, min_after_dequeue=500, num_threads=1)
 
     image_test, label_test = tfrecord.read_and_decode(
-        "D:/final work/FinalWork-Ms.Wu/Project/character test.tfrecords", tfrecord.Character)
+        "../character test.tfrecords", tfrecord.Character)
     image_test_batch, label_test_batch = tf.train.shuffle_batch(
         [image_test, label_test], batch_size=BATCH_SIZE, capacity=CAPACITY, min_after_dequeue=500, num_threads=1)
 
@@ -192,7 +191,7 @@ def main(argv=[sys.argv[0]]):
     with tf.name_scope('loss'):
         cross_entropy = tf.nn.softmax_cross_entropy_with_logits_v2(labels=y_, logits=y_conv)
         cross_entropy_mean = tf.reduce_mean(cross_entropy)
-        tf.summary.histogram('loss', cross_entropy_mean)
+        tf.summary.scalar('loss', cross_entropy_mean)
 
     # 设置指数衰减学习率。学习率 = learning_rate * decay_rate^(global_step/decay_steps)
     with tf.name_scope('adam_optimizer'):
@@ -207,10 +206,9 @@ def main(argv=[sys.argv[0]]):
         tf.summary.histogram('learning_rate', learning_rate)
 
     with tf.name_scope('accuracy'):
-        correct_prediction = tf.equal(tf.argmax(y_conv, 1), tf.argmax(y_, 1))
-        correct_prediction = tf.cast(correct_prediction, tf.float32)
+        correct_prediction = tf.cast(tf.equal(tf.argmax(y_conv, 1), tf.argmax(y_, 1)), tf.float32)
         accuracy = tf.reduce_mean(correct_prediction)
-        tf.summary.histogram('accuracy', accuracy)
+        tf.summary.scalar('accuracy', accuracy)
 
     config = tf.ConfigProto()
     config.gpu_options.allow_growth = True
@@ -220,7 +218,8 @@ def main(argv=[sys.argv[0]]):
         coord = tf.train.Coordinator()
         threads = tf.train.start_queue_runners(sess=sess, coord=coord)
         ckpt = tf.train.get_checkpoint_state(MODEL_SAVE_PATH)
-        writer = tf.summary.FileWriter('../Logs', sess.graph)
+        writer_test = tf.summary.FileWriter('../Logs/Character_test', sess.graph)
+        writer_train = tf.summary.FileWriter('../Logs/Character_train', sess.graph)
         merged = tf.summary.merge_all()
         if ckpt and ckpt.model_checkpoint_path:
             # 加载模型。
@@ -234,24 +233,26 @@ def main(argv=[sys.argv[0]]):
         try:
             while not coord.should_stop():
                 global_step = 1 + global_step
-                xs, ys = sess.run([image_train_batch, label_train_batch])
+                train_xs, train_ys = sess.run([image_train_batch, label_train_batch])
                 if (global_step % 10 == 0) and global_step != 0:
                     xs_test, ys_test = sess.run([image_test_batch, label_test_batch])
-                    train_accuracy = accuracy.eval(feed_dict={
+                    test_accuracy, test_summary = sess.run([accuracy, merged], feed_dict={
                         x: xs_test, y_: ys_test, keep_prob: 1.0})
-                    print('step %d, training accuracy %g' % (global_step, train_accuracy))
+                    print('step %d, test accuracy %g' % (global_step, test_accuracy))
+                    writer_test.add_summary(test_summary, global_step)
                     saver.save(
                         sess, os.path.join(MODEL_SAVE_PATH, MODEL_NAME),
                         global_step=global_step)
-                _, test_accuracy, summary = sess.run([train_step, accuracy, merged], feed_dict={
-                    x: xs, y_: ys, keep_prob: 0.5})
-                writer.add_summary(summary, global_step)
-                print('test accuracy %g' % test_accuracy)
+                _, train_accuracy, train_summary = sess.run([train_step, accuracy, merged], feed_dict={
+                    x: train_xs, y_: train_ys, keep_prob: 0.5})
+                writer_train.add_summary(train_summary, global_step)
+                print('train accuracy %g' % train_accuracy)
         except tf.errors.OutOfRangeError as e:
             coord.request_stop(e)
             print('Done training -- epoch limit reached')
         finally:
-            writer.close()
+            writer_train.close()
+            writer_test.close()
             coord.request_stop()
             coord.join(threads)
 

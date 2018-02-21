@@ -30,7 +30,7 @@ CONV2_SIZE = 5
 # 全连接层的节点个数。
 FC_SIZE = 512
 
-MODEL_SAVE_PATH = "D:/final work/FinalWork-Ms.Wu/Project/Model/licence/"
+MODEL_SAVE_PATH = "../Model/licence/"
 MODEL_NAME = "model.kpt"
 
 
@@ -151,12 +151,12 @@ def bias_variable(shape):
 def main(_):
     # Import data
     image_train, label_train = lic_tfrecord.read_and_decode(
-        "D:/final work/FinalWork-Ms.Wu/Project/license train.tfrecords")
+        "../license train.tfrecords")
     image_train_batch, label_train_batch = tf.train.shuffle_batch(
         [image_train, label_train], batch_size=BATCH_SIZE, capacity=CAPACITY, min_after_dequeue=100, num_threads=1)
 
     image_test, label_test = lic_tfrecord.read_and_decode(
-        "D:/final work/FinalWork-Ms.Wu/Project/license test.tfrecords")
+        "../license test.tfrecords")
     image_test_batch, label_test_batch = tf.train.shuffle_batch(
         [image_test, label_test], batch_size=BATCH_SIZE, capacity=CAPACITY, min_after_dequeue=100, num_threads=1)
 

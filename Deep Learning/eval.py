@@ -9,8 +9,6 @@ import CharacterRecognition
 import inference
 import tfrecord
 
-IMAGE_PATH = "C:/Users/Hao/Desktop/train/ann/Q/50.jpg"
-
 
 def image_to_character(image_path):
     img = cv2.imread(image_path, 0)

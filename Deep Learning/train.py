@@ -110,7 +110,7 @@ def train(image, label):
 
 # 主程序入口。
 def main(argv = None):
-    image, label = tfrecord.read_and_decode("E:/iCloudDrive/毕业设计-吴沈青/车牌识别-python/train.tfrecords")
+    image, label = tfrecord.read_and_decode("../train.tfrecords")
     image_batch, label_batch = tf.train.shuffle_batch(
         [image, label], batch_size=BATCH_SIZE, capacity=CAPACITY, min_after_dequeue=500, num_threads=1)
     label_batch = tf.reshape(label_batch, [BATCH_SIZE, tfrecord.Length])

@@ -8,12 +8,12 @@ License = 1
 Train = 0
 Test = 1
 
-character_test_path = 'D:/final work/FinalWork-Ms.Wu/Project/Train/ann/'
-character_train_path = 'D:/final work/FinalWork-Ms.Wu/Project/Train/annGray/'
-license_test_path = ['D:/final work/FinalWork-Ms.Wu/Project/Train/svm/has/test',
-                     'D:/final work/FinalWork-Ms.Wu/Project/Train/svm/no/test']
-license_train_path = ['D:/final work/FinalWork-Ms.Wu/Project/Train/svm/has/train',
-                      'D:/final work/FinalWork-Ms.Wu/Project/Train/svm/no/train']
+character_test_path = '../Train/ann/'
+character_train_path = '../Train/annGray/'
+license_test_path = ['../Train/svm/has/test',
+                     '../Train/svm/no/test']
+license_train_path = ['../Train/svm/has/train',
+                      '../Train/svm/no/train']
 
 character_classes = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
                      'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'J', 'K',
@@ -43,7 +43,7 @@ def create_record(CharacterOrLicense, TrainOrTest):
             temp = "test"
             print("Creating TFRecord Of Character Test...")
             path = character_test_path
-        writer = tf.python_io.TFRecordWriter("D:/final work/FinalWork-Ms.Wu/Project" + "character " + temp + ".tfrecords")
+        writer = tf.python_io.TFRecordWriter("../" + "character " + temp + ".tfrecords")
         for index, name in enumerate(classes):              # 枚举classes中所有项目
             print("Creating TFRecord Of ", name)
             class_path = path + name + '/'
@@ -69,7 +69,7 @@ def create_record(CharacterOrLicense, TrainOrTest):
             temp = "test"
             print("Creating TFRecord Of License Test...")
             path = license_test_path
-        writer = tf.python_io.TFRecordWriter("D:/final work/FinalWork-Ms.Wu/Project" + "license " + temp + ".tfrecords")
+        writer = tf.python_io.TFRecordWriter("../" + "license " + temp + ".tfrecords")
         for index, name in enumerate(path):  # 枚举classes中所有项目
             print("Creating TFRecord Of ", index)
             class_path = name + '/'

@@ -1,6 +1,5 @@
 import os
 import sys
-from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 import cv2
@@ -19,55 +18,55 @@ class MainWindow(QMainWindow,  Ui_MainWindow):
         image_path,  _ = QFileDialog.getOpenFileName(self,  "打开图片",  "../Train/svm/has/train/",  "Image file (*jpg)")
         if image_path:
             image = QPixmap(image_path)
-            self.Photo.setPixmap(image)
+            self.photo.setPixmap(image)
             self.getcharacter(image_path)
             self.getresult(image_path)
 
     def getcharacter(self, image_path):
         section, para = image_to_character(image_path)
         path = ""
-        self.Char0.clear()
-        self.Char1.clear()
-        self.Char2.clear()
-        self.Char3.clear()
-        self.Char4.clear()
-        self.Char5.clear()
-        self.Char6.clear()
-        if 0 < section :
-            path = "C:/Users/Hao/Desktop/temp/0.jpg"
+        self.char0.clear()
+        self.char1.clear()
+        self.char2.clear()
+        self.char3.clear()
+        self.char4.clear()
+        self.char5.clear()
+        self.char6.clear()
+        if 0 < section:
+            path = "temp.jpg"
             cv2.imwrite(path,  para[0])
             paragraph = QPixmap(path)
-            self.Char0.setPixmap(paragraph)
-        if 1 < section :
-            path = "C:/Users/Hao/Desktop/temp/0.jpg"
+            self.char0.setPixmap(paragraph)
+        if 1 < section:
+            path = "temp.jpg"
             cv2.imwrite(path,  para[1])
             paragraph = QPixmap(path)
-            self.Char1.setPixmap(paragraph)
-        if 2 < section :
-            path = "C:/Users/Hao/Desktop/temp/0.jpg"
+            self.char1.setPixmap(paragraph)
+        if 2 < section:
+            path = "temp.jpg"
             cv2.imwrite(path,  para[2])
             paragraph = QPixmap(path)
-            self.Char2.setPixmap(paragraph)
-        if 3 < section :
-            path = "C:/Users/Hao/Desktop/temp/0.jpg"
+            self.char2.setPixmap(paragraph)
+        if 3 < section:
+            path = "temp.jpg"
             cv2.imwrite(path,  para[3])
             paragraph = QPixmap(path)
-            self.Char3.setPixmap(paragraph)
-        if 4 < section :
-            path = "C:/Users/Hao/Desktop/temp/0.jpg"
+            self.char3.setPixmap(paragraph)
+        if 4 < section:
+            path = "temp.jpg"
             cv2.imwrite(path,  para[4])
             paragraph = QPixmap(path)
-            self.Char4.setPixmap(paragraph)
-        if 5 < section :
-            path = "C:/Users/Hao/Desktop/temp/0.jpg"
+            self.char4.setPixmap(paragraph)
+        if 5 < section:
+            path = "temp.jpg"
             cv2.imwrite(path,  para[5])
             paragraph = QPixmap(path)
-            self.Char5.setPixmap(paragraph)
-        if 6 < section :
-            path = "C:/Users/Hao/Desktop/temp/0.jpg"
+            self.char5.setPixmap(paragraph)
+        if 6 < section:
+            path = "temp.jpg"
             cv2.imwrite(path,  para[6])
             paragraph = QPixmap(path)
-            self.Char6.setPixmap(paragraph)
+            self.char6.setPixmap(paragraph)
             
         if path:
             os.remove(path)

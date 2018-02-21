@@ -2,13 +2,13 @@
 
 import os
 import tensorflow as tf
-import tfrecord
 import sys
-import tempfile
+
+import tfrecord
 
 
 BATCH_SIZE = 5000                    # 一个训练batch中的训练数据个数。数字越小时，训练过程越接近
-CAPACITY = 10000 + 2 * BATCH_SIZE
+CAPACITY = 50000 + 2 * BATCH_SIZE
 
 # 配置神经网络的参数。
 INPUT_NODE = 20*20
@@ -45,13 +45,13 @@ def deepnn(x):
     # 声明第一层卷积层的前向传播过程。定义的卷积层输入为20*20*1的图像像素。因为卷积
     # 层中使用了全0填充，所以输出为20*20*32。
     with tf.name_scope('layer1-conv1'):
-        W_conv1 = weight_variable([CONV1_SIZE, CONV1_SIZE, NUM_CHANNELS, CONV1_DEEP])
+        w_conv1 = weight_variable([CONV1_SIZE, CONV1_SIZE, NUM_CHANNELS, CONV1_DEEP])
         b_conv1 = bias_variable([CONV1_DEEP])
 
         # 使用边长为5，深度为32的过滤器，过滤器移动的步长为1，且使用全0填充。
-        h_conv1 = tf.nn.relu(conv2d(x_image, W_conv1) + b_conv1)
+        h_conv1 = tf.nn.relu(conv2d(x_image, w_conv1) + b_conv1)
 
-        tf.summary.histogram('W_conv1', W_conv1)
+        tf.summary.histogram('W_conv1', w_conv1)
         tf.summary.histogram('b_conv1', b_conv1)
         tf.summary.histogram('h_conv1', h_conv1)
 
@@ -65,13 +65,13 @@ def deepnn(x):
     # 声明第三层卷积层的变量并实现前向传播过程。这一层的输入为10*10*32的矩阵。输
     # 出为10*10*64的矩阵。
     with tf.name_scope('layer3-conv2'):
-        W_conv2 = weight_variable([CONV2_SIZE, CONV2_SIZE, CONV1_DEEP, CONV2_DEEP])
+        w_conv2 = weight_variable([CONV2_SIZE, CONV2_SIZE, CONV1_DEEP, CONV2_DEEP])
         b_conv2 = bias_variable([CONV2_DEEP])
 
         # 使用边长为5，深度为64的过滤器，过滤器的步长为1，且使用全0填充。
-        h_conv2 = tf.nn.relu(conv2d(h_pool1, W_conv2) + b_conv2)
+        h_conv2 = tf.nn.relu(conv2d(h_pool1, w_conv2) + b_conv2)
 
-        tf.summary.histogram('W_conv2', W_conv2)
+        tf.summary.histogram('w_conv2', w_conv2)
         tf.summary.histogram('b_conv2', b_conv2)
         tf.summary.histogram('h_conv2', h_conv2)
 
@@ -98,12 +98,12 @@ def deepnn(x):
     # 声明第五层全连接层的变量并实现前向传播过程。这一层的输入为5*5*64的矩阵，输出
     # 为一组长度为1024的向量。这一层
     with tf.name_scope('layer5-fc1'):
-        W_fc1 = weight_variable([nodes, FC_SIZE])
+        w_fc1 = weight_variable([nodes, FC_SIZE])
         b_fc1 = bias_variable([FC_SIZE])
 
-        h_fc1 = tf.nn.relu(tf.matmul(reshaped, W_fc1) + b_fc1)
+        h_fc1 = tf.nn.relu(tf.matmul(reshaped, w_fc1) + b_fc1)
 
-        tf.summary.histogram('W_fc1', W_fc1)
+        tf.summary.histogram('w_fc1', w_fc1)
         tf.summary.histogram('b_fc1', b_fc1)
         tf.summary.histogram('h_fc1', h_fc1)
 
@@ -118,12 +118,12 @@ def deepnn(x):
     # 量，输出为一组长度为2的向量。这一层的输出通过softmax之后就得到了最后的分类结
     # 果。
     with tf.name_scope('layer6-fc2'):
-        W_fc2 = weight_variable([FC_SIZE, NUM_LABLES])
+        w_fc2 = weight_variable([FC_SIZE, NUM_LABLES])
         b_fc2 = bias_variable([NUM_LABLES])
 
-        y_conv = tf.matmul(h_fc1_drop, W_fc2) + b_fc2
+        y_conv = tf.matmul(h_fc1_drop, w_fc2) + b_fc2
 
-        tf.summary.histogram('W_fc2', W_fc2)
+        tf.summary.histogram('w_fc2', w_fc2)
         tf.summary.histogram('b_fc2', b_fc2)
         tf.summary.histogram('y_conv', y_conv)
 
@@ -137,9 +137,9 @@ def deepnn(x):
 # 同维度上的步长。虽然第三个参数提供的是一个长度为4 的数组，但是第一维和最后一维的数字
 # 要求一定是1。这是因为卷积层的步长只对只对矩阵的长和宽有效。最后一个参数是填充，
 # “VALID”表示不添加。
-def conv2d(x, W):
+def conv2d(x, w):
     """conv2d returns a 2d convolution layer with full stride."""
-    return tf.nn.conv2d(x, W, strides=[1, 1, 1, 1], padding='SAME')
+    return tf.nn.conv2d(x, w, strides=[1, 1, 1, 1], padding='SAME')
 
 
 # tf.nn.max_pool实现了最大池化层的前向传播过程，它的参数和tf.nn.conv2d函数类似。
@@ -166,7 +166,7 @@ def bias_variable(shape):
     return tf.Variable(initial)
 
 
-def main(argv=[sys.argv[0]]):
+def main(_):
     # Import data
     image_train, label_train = tfrecord.read_and_decode(
         "../character train.tfrecords", tfrecord.Character)
@@ -251,10 +251,10 @@ def main(argv=[sys.argv[0]]):
             coord.request_stop(e)
             print('Done training -- epoch limit reached')
         finally:
-            writer_train.close()
-            writer_test.close()
             coord.request_stop()
             coord.join(threads)
+        writer_test.close()
+        writer_train.close()
 
 
 if __name__ == '__main__':

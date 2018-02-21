@@ -27,7 +27,7 @@ def image_to_character(image_path):
         sum += line[i]
 
     for i in range(x):
-        if line[x - i - 1] < (sum / x /2):
+        if line[x - i - 1] < (sum / x / 2):
             del image[x - i - 1]
     image = np.array(image)
 
@@ -40,14 +40,14 @@ def image_to_character(image_path):
         line[i] = 0
         for l in range(x):
             line[i] += image[l][i]
-        if (line[i] < 300) and (top != None):
+        if (line[i] < 300) and (top is not None):
             bottom = i
             for m in range(x):
                 para[section].append(image[m][top:bottom])
             para.append([])
             section += 1
             top = None
-        elif (line[i] > 300) and (top == None):
+        elif (line[i] > 300) and (top is None):
             top = i
 
     '''for i in range(section):
@@ -57,17 +57,15 @@ def image_to_character(image_path):
     for i in range(section):
         para[i] = np.array(para[i]).reshape(x, -1)
 
-    l = 0
+    index = 0
     for i in range(section):
         temp = para[section - i - 1].sum()
         if temp < 5000:
             del para[section - i - 1]
-            l = l + 1
-    section = section - l
+            index = index + 1
+    section = section - index
 
-    image = para
-
-    return section, image
+    return section, para
 
 
 def evaluate_one_character(image_path):
@@ -166,12 +164,13 @@ def evaluate_one_image(image_path):
     return result
 
 
-def main(argv = None):
+def main():
     for i in range(1917):
         path = "C:/Users/Hao/Desktop/test/" + str(i) + ".jpg"
         image = evaluate_one_image(path)
-        
+
+        return image
+
 
 if __name__ == '__main__':
     tf.app.run()
-

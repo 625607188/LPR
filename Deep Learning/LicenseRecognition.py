@@ -47,11 +47,11 @@ def deepnn(x):
     # 声明第一层卷积层的前向传播过程。定义的卷积层输入为136*36*3的图像像素。因为卷积
     # 层中使用了全0填充，所以输出为136*36*32。
     with tf.name_scope('layer1-conv1'):
-        W_conv1 = weight_variable([CONV1_SIZE, CONV1_SIZE, NUM_CHANNELS, CONV1_DEEP])
+        w_conv1 = weight_variable([CONV1_SIZE, CONV1_SIZE, NUM_CHANNELS, CONV1_DEEP])
         b_conv1 = bias_variable([CONV1_DEEP])
 
         # 使用边长为5，深度为32的过滤器，过滤器移动的步长为1，且使用全0填充。
-        h_conv1 = tf.nn.relu(conv2d(x_image, W_conv1) + b_conv1)
+        h_conv1 = tf.nn.relu(conv2d(x_image, w_conv1) + b_conv1)
 
     # 声明第二层池化层的前向传播过程。这里选用最大池化层，池化层过滤器的边长为2，
     # 使用全0填充且移动的步长为2。这一层的输入是上一层的输出，也就是20*20*32的矩
@@ -62,11 +62,11 @@ def deepnn(x):
     # 声明第三层卷积层的变量并实现前向传播过程。这一层的输入为10*10*32的矩阵。输
     # 出为10*10*64的矩阵。
     with tf.name_scope('layer3-conv2'):
-        W_conv2 = weight_variable([CONV2_SIZE, CONV2_SIZE, CONV1_DEEP, CONV2_DEEP])
+        w_conv2 = weight_variable([CONV2_SIZE, CONV2_SIZE, CONV1_DEEP, CONV2_DEEP])
         b_conv2 = bias_variable([CONV2_DEEP])
 
         # 使用边长为5，深度为64的过滤器，过滤器的步长为1，且使用全0填充。
-        h_conv2 = tf.nn.relu(conv2d(h_pool1, W_conv2) + b_conv2)
+        h_conv2 = tf.nn.relu(conv2d(h_pool1, w_conv2) + b_conv2)
 
     # 实现第四层池化层的前向传播过程。这一层和第三层的结构是一样的。这一层的输入
     # 为10*10*64的矩阵，输出为5*5*64的矩阵。
@@ -90,10 +90,10 @@ def deepnn(x):
     # 声明第五层全连接层的变量并实现前向传播过程。这一层的输入为5*5*64的矩阵，输出
     # 为一组长度为1024的向量。这一层
     with tf.name_scope('layer5-fc1'):
-        W_fc1 = weight_variable([nodes, FC_SIZE])
+        w_fc1 = weight_variable([nodes, FC_SIZE])
         b_fc1 = bias_variable([FC_SIZE])
 
-        h_fc1 = tf.nn.relu(tf.matmul(reshaped, W_fc1) + b_fc1)
+        h_fc1 = tf.nn.relu(tf.matmul(reshaped, w_fc1) + b_fc1)
 
     # 引入了dropout的概念。dropout在训练时会随机将部分节点的输出改为0。dropout可以
     # 避免过拟合问题，从而使得模型在测试数据上的效果更好。
@@ -105,10 +105,10 @@ def deepnn(x):
     # 量，输出为一组长度为2的向量。这一层的输出通过softmax之后就得到了最后的分类结
     # 果。
     with tf.name_scope('layer6-fc2'):
-        W_fc2 = weight_variable([FC_SIZE, NUM_LABLES])
+        w_fc2 = weight_variable([FC_SIZE, NUM_LABLES])
         b_fc2 = bias_variable([NUM_LABLES])
 
-        y_conv = tf.matmul(h_fc1_drop, W_fc2) + b_fc2
+        y_conv = tf.matmul(h_fc1_drop, w_fc2) + b_fc2
         return y_conv, keep_prob
 
 
@@ -119,9 +119,9 @@ def deepnn(x):
 # 同维度上的步长。虽然第三个参数提供的是一个长度为4 的数组，但是第一维和最后一维的数字
 # 要求一定是1。这是因为卷积层的步长只对只对矩阵的长和宽有效。最后一个参数是填充，
 # “VALID”表示不添加。
-def conv2d(x, W):
+def conv2d(x, w):
     """conv2d returns a 2d convolution layer with full stride."""
-    return tf.nn.conv2d(x, W, strides=[1, 1, 1, 1], padding='SAME')
+    return tf.nn.conv2d(x, w, strides=[1, 1, 1, 1], padding='SAME')
 
 
 # tf.nn.max_pool实现了最大池化层的前向传播过程，它的参数和tf.nn.conv2d函数类似。
@@ -171,7 +171,6 @@ def main(_):
     # 调用卷积神经网络。
     y_conv, keep_prob = deepnn(x)
 
-
     # 定义交叉熵损失函数。
     with tf.name_scope('loss'):
         cross_entropy = tf.nn.softmax_cross_entropy_with_logits(labels=y_,
@@ -209,8 +208,7 @@ def main(_):
             # 加载模型。
             saver.restore(sess, ckpt.model_checkpoint_path)
             # 通过文件名得到模型保存时迭代的轮数。
-            global_step = int(ckpt.model_checkpoint_path\
-                              .split('/')[-1].split('-')[-1])
+            global_step = int(ckpt.model_checkpoint_path.split('/')[-1].split('-')[-1])
             print("Loading success, global_step is %d " % global_step)
         else:
             global_step = 0
@@ -239,4 +237,4 @@ def main(_):
 
 
 if __name__ == '__main__':
-  tf.app.run(main=main, argv=[sys.argv[0]])
+    tf.app.run(main=main, argv=[sys.argv[0]])

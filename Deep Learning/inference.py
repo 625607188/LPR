@@ -21,7 +21,7 @@ def get_weight_variable(shape, regularizer=None):
     # 当给出了正则化生成函数时，将当前变量的正则化损失加入名字为losses的集合。在这里
     # 使用了add_to_collection函数将一个张量加入一个集合，而这个集合的名称为losses。
     # 这是自定义的集合，不在TensorFlow自动管理的集合列表中。
-    if regularizer != None:
+    if regularizer is not None:
         tf.add_to_collection('losses', regularizer(weights))
     return weights
 

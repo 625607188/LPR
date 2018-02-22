@@ -78,7 +78,6 @@ def create_record(character_or_license, train_or_test):
                 img = cv2.imread(img_path, cv2.IMREAD_COLOR)                            # 打开照片
                 img = cv2.resize(img, (40, 12), interpolation=cv2.INTER_AREA)
                 img_raw = img.tobytes()                                                 # 将图片转化为原生bytes
-                print(class_path + "     " + str(label[index]))
                 example = tf.train.Example(features=tf.train.Features(
                     feature={
                         '_label': tf.train.Feature(int64_list=tf.train.Int64List(value=label[index])),

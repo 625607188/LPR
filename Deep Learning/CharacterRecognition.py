@@ -51,7 +51,7 @@ def deepnn(x):
         # 使用边长为5，深度为32的过滤器，过滤器移动的步长为1，且使用全0填充。
         h_conv1 = tf.nn.relu(conv2d(x_image, w_conv1) + b_conv1)
 
-        tf.summary.histogram('W_conv1', w_conv1)
+        tf.summary.histogram('w_conv1', w_conv1)
         tf.summary.histogram('b_conv1', b_conv1)
         tf.summary.histogram('h_conv1', h_conv1)
 

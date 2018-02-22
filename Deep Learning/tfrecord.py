@@ -24,34 +24,34 @@ character_label = [[0 for col in range(character_length)] for row in range(chara
 for i in range(character_length):
     character_label[i][i] = 1
 license_classes = ['0', '1']
-license_length = len(character_classes)
+license_length = len(license_classes)
 license_label = [[1, 0], [0, 1]]
 
 
 # 生成训练所需的训练集tfrecords
-def create_record(CharacterOrLicense, TrainOrTest):
+def create_record(character_or_license, train_or_test):
     temp = ""
     path = ""
-    if CharacterOrLicense == Character:
+    if character_or_license == Character:
         classes = character_classes
         label = character_label
-        if TrainOrTest == Train:
+        if train_or_test == Train:
             temp = "train"
             print("Creating TFRecord Of Character Train...")
             path = character_train_path
-        elif TrainOrTest == Test:
+        elif train_or_test == Test:
             temp = "test"
             print("Creating TFRecord Of Character Test...")
             path = character_test_path
         writer = tf.python_io.TFRecordWriter("../" + "character " + temp + ".tfrecords")
-        for index, name in enumerate(classes):              # 枚举classes中所有项目
+        for index, name in enumerate(classes):                                      # 枚举classes中所有项目
             print("Creating TFRecord Of ", name)
             class_path = path + name + '/'
             for img_name in os.listdir(class_path):
-                img_path = class_path + img_name            # 记录照片路径
-                img = cv2.imread(img_path, 0)               # 打开照片
+                img_path = class_path + img_name                                    # 记录照片路径
+                img = cv2.imread(img_path, cv2.IMREAD_GRAYSCALE)                    # 打开照片
                 img = cv2.resize(img, (20, 20), interpolation=cv2.INTER_AREA)
-                img_raw = img.tobytes()                     # 将图片转化为原生bytes
+                img_raw = img.tobytes()                                             # 将图片转化为原生bytes
                 example = tf.train.Example(features=tf.train.Features(
                             feature={
                                      '_label': tf.train.Feature(int64_list=tf.train.Int64List(value=label[index])),
@@ -59,25 +59,26 @@ def create_record(CharacterOrLicense, TrainOrTest):
                                      }))
                 writer.write(example.SerializeToString())
         writer.close()
-    elif CharacterOrLicense == License:
+    elif character_or_license == License:
         label = license_label
-        if TrainOrTest == Train:
+        if train_or_test == Train:
             temp = "train"
             print("Creating TFRecord Of License Train...")
             path = license_train_path
-        elif TrainOrTest == Test:
+        elif train_or_test == Test:
             temp = "test"
             print("Creating TFRecord Of License Test...")
             path = license_test_path
         writer = tf.python_io.TFRecordWriter("../" + "license " + temp + ".tfrecords")
-        for index, name in enumerate(path):  # 枚举classes中所有项目
+        for index, name in enumerate(path):                                             # 枚举classes中所有项目
             print("Creating TFRecord Of ", index)
             class_path = name + '/'
             for img_name in os.listdir(class_path):
-                img_path = class_path + img_name  # 记录照片路径
-                img = cv2.imread(img_path)  # 打开照片
-                img = cv2.resize(img, (136, 36), interpolation=cv2.INTER_AREA)
-                img_raw = img.tobytes()  # 将图片转化为原生bytes
+                img_path = class_path + img_name                                        # 记录照片路径
+                img = cv2.imread(img_path, cv2.IMREAD_COLOR)                            # 打开照片
+                img = cv2.resize(img, (40, 12), interpolation=cv2.INTER_AREA)
+                img_raw = img.tobytes()                                                 # 将图片转化为原生bytes
+                print(class_path + "     " + str(label[index]))
                 example = tf.train.Example(features=tf.train.Features(
                     feature={
                         '_label': tf.train.Feature(int64_list=tf.train.Int64List(value=label[index])),
@@ -88,15 +89,15 @@ def create_record(CharacterOrLicense, TrainOrTest):
 
 
 # 读取tfrecords文件
-def read_and_decode(filename, CharacterOrLicense):
+def read_and_decode(filename, character_or_license):
     length = 0
     area = 0
-    if CharacterOrLicense == Character:
+    if character_or_license == Character:
         length = character_length
         area = 20 * 20
-    elif CharacterOrLicense == License:
+    elif character_or_license == License:
         length = license_length
-        area = 136 * 36
+        area = 40 * 12 * 3
     # 创建一个文件队列来维护文件列表,不限读取的数量
     filename_queue = tf.train.string_input_producer([filename])
     # 创建一个reader用于读取队列
@@ -123,8 +124,9 @@ def read_and_decode(filename, CharacterOrLicense):
     return image, label
 
 
-def main(argv=None):
-    create_record(Character, Train)
+def main(_):
+    create_record(License, Train)
+    create_record(License, Test)
     '''create_record(Character, Test)
     create_record(License, Train)
     create_record(License, Test)'''

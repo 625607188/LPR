@@ -2,22 +2,18 @@
 
 import os
 import tensorflow as tf
-import lic_tfrecord
-import argparse
 import sys
-import tempfile
-import train
-import inference
+import tfrecord
 
-BATCH_SIZE = 300                    # 一个训练batch中的训练数据个数。数字越小时，训练过程越接近
-CAPACITY = 20000 + BATCH_SIZE * 10
+BATCH_SIZE = 4000                    # 一个训练batch中的训练数据个数。数字越小时，训练过程越接近
+CAPACITY = 20000 + BATCH_SIZE * 2
 
 # 配置神经网络的参数。
-INPUT_NODE = 136*36*3
+INPUT_NODE = 40*12*3
 OUTPUT_NODE = 2
 
-IMAGE_SIZE_L = 136
-IMAGE_SIZE_W = 36
+IMAGE_SIZE_L = 40
+IMAGE_SIZE_W = 12
 NUM_CHANNELS = 3
 NUM_LABLES = 2
 
@@ -28,7 +24,7 @@ CONV1_SIZE = 5
 CONV2_DEEP = 64
 CONV2_SIZE = 5
 # 全连接层的节点个数。
-FC_SIZE = 512
+FC_SIZE = 1024
 
 MODEL_SAVE_PATH = "../Model/licence/"
 MODEL_NAME = "model.kpt"
@@ -43,9 +39,10 @@ def deepnn(x):
     # 表示图片的深度。当参数为-1时，根据剩下的维度计算出数组的另外一个shape属性值。
     with tf.name_scope('reshape'):
         x_image = tf.reshape(x, [-1, IMAGE_SIZE_L, IMAGE_SIZE_W, NUM_CHANNELS])
+        tf.summary.image('input', x_image, 2)
 
-    # 声明第一层卷积层的前向传播过程。定义的卷积层输入为136*36*3的图像像素。因为卷积
-    # 层中使用了全0填充，所以输出为136*36*32。
+    # 声明第一层卷积层的前向传播过程。定义的卷积层输入为40*12*3的图像像素。因为卷积
+    # 层中使用了全0填充，所以输出为40*12*32。
     with tf.name_scope('layer1-conv1'):
         w_conv1 = weight_variable([CONV1_SIZE, CONV1_SIZE, NUM_CHANNELS, CONV1_DEEP])
         b_conv1 = bias_variable([CONV1_DEEP])
@@ -53,14 +50,19 @@ def deepnn(x):
         # 使用边长为5，深度为32的过滤器，过滤器移动的步长为1，且使用全0填充。
         h_conv1 = tf.nn.relu(conv2d(x_image, w_conv1) + b_conv1)
 
+        tf.summary.histogram('w_conv1', w_conv1)
+        tf.summary.histogram('b_conv1', b_conv1)
+        tf.summary.histogram('h_conv1', h_conv1)
+
     # 声明第二层池化层的前向传播过程。这里选用最大池化层，池化层过滤器的边长为2，
-    # 使用全0填充且移动的步长为2。这一层的输入是上一层的输出，也就是20*20*32的矩
-    # 阵。输出为10*10*32的矩阵。
+    # 使用全0填充且移动的步长为2。这一层的输入是上一层的输出，也就是40*12*3*32的矩
+    # 阵。输出为20*6*3*32的矩阵。
     with tf.name_scope('layer2-pool1'):
         h_pool1 = max_pool_2x2(h_conv1)
+        tf.summary.histogram('h_pool1', h_pool1)
 
-    # 声明第三层卷积层的变量并实现前向传播过程。这一层的输入为10*10*32的矩阵。输
-    # 出为10*10*64的矩阵。
+    # 声明第三层卷积层的变量并实现前向传播过程。这一层的输入为20*6*3*32的矩阵。输
+    # 出为20*6*3*64的矩阵。
     with tf.name_scope('layer3-conv2'):
         w_conv2 = weight_variable([CONV2_SIZE, CONV2_SIZE, CONV1_DEEP, CONV2_DEEP])
         b_conv2 = bias_variable([CONV2_DEEP])
@@ -68,13 +70,18 @@ def deepnn(x):
         # 使用边长为5，深度为64的过滤器，过滤器的步长为1，且使用全0填充。
         h_conv2 = tf.nn.relu(conv2d(h_pool1, w_conv2) + b_conv2)
 
+        tf.summary.histogram('w_conv2', w_conv2)
+        tf.summary.histogram('b_conv2', b_conv2)
+        tf.summary.histogram('h_conv2', h_conv2)
+
     # 实现第四层池化层的前向传播过程。这一层和第三层的结构是一样的。这一层的输入
-    # 为10*10*64的矩阵，输出为5*5*64的矩阵。
+    # 为20*6*3*64的矩阵，输出为10*3*3*64的矩阵。
     with tf.name_scope('layer4-pool2'):
         h_pool2 = max_pool_2x2(h_conv2)
+        tf.summary.histogram('h_pool2', h_conv2)
 
-    # 将第四层池化层的输出转化为第五层全连接层的输入格式。第四层的输出为为5*5*64
-    # 的矩阵，然而第五层全连接层需要的输入格式为向量，所以在这里需要将这个5*5*64
+    # 将第四层池化层的输出转化为第五层全连接层的输入格式。第四层的输出为为10*3*3*64
+    # 的矩阵，然而第五层全连接层需要的输入格式为向量，所以在这里需要将这个10*3*3*64
     # 的矩阵拉直成一个向量。h_pool2.get_shape函数可以得到第四层输出矩阵的维度而不
     # 需要手工计算。注意因为每一层神经网络的输入输出都为一个batch的矩阵，所以这里
     # 得到的维度也包含了一个batch中数据的个数。
@@ -87,7 +94,7 @@ def deepnn(x):
     # 通过tf.reshape函数将第四层的输出变为一个batch的变量。
     reshaped = tf.reshape(h_pool2, [-1, nodes])
 
-    # 声明第五层全连接层的变量并实现前向传播过程。这一层的输入为5*5*64的矩阵，输出
+    # 声明第五层全连接层的变量并实现前向传播过程。这一层的输入为10*3*3*64的矩阵，输出
     # 为一组长度为1024的向量。这一层
     with tf.name_scope('layer5-fc1'):
         w_fc1 = weight_variable([nodes, FC_SIZE])
@@ -95,10 +102,15 @@ def deepnn(x):
 
         h_fc1 = tf.nn.relu(tf.matmul(reshaped, w_fc1) + b_fc1)
 
+        tf.summary.histogram('w_fc1', w_fc1)
+        tf.summary.histogram('b_fc1', b_fc1)
+        tf.summary.histogram('h_fc1', h_fc1)
+
     # 引入了dropout的概念。dropout在训练时会随机将部分节点的输出改为0。dropout可以
     # 避免过拟合问题，从而使得模型在测试数据上的效果更好。
     with tf.name_scope('dropout'):
         keep_prob = tf.placeholder(tf.float32)
+        tf.summary.scalar('keep_prob', keep_prob)
         h_fc1_drop = tf.nn.dropout(h_fc1, keep_prob)
 
     # 声明第六层全连接层的变量并实现前向传播过程。这一层的输入为一组长度为1024的向
@@ -109,7 +121,12 @@ def deepnn(x):
         b_fc2 = bias_variable([NUM_LABLES])
 
         y_conv = tf.matmul(h_fc1_drop, w_fc2) + b_fc2
-        return y_conv, keep_prob
+
+        tf.summary.histogram('w_fc2', w_fc2)
+        tf.summary.histogram('b_fc2', b_fc2)
+        tf.summary.histogram('y_conv', y_conv)
+
+    return y_conv, keep_prob
 
 
 # tf.nn.conv2d 提供了一个非常方便的函数来实现卷积层前向传播算法。这个函数的第一个输
@@ -150,51 +167,45 @@ def bias_variable(shape):
 
 def main(_):
     # Import data
-    image_train, label_train = lic_tfrecord.read_and_decode(
-        "../license train.tfrecords")
+    image_train, label_train = tfrecord.read_and_decode("../license train.tfrecords", tfrecord.License)
     image_train_batch, label_train_batch = tf.train.shuffle_batch(
         [image_train, label_train], batch_size=BATCH_SIZE, capacity=CAPACITY, min_after_dequeue=100, num_threads=1)
 
-    image_test, label_test = lic_tfrecord.read_and_decode(
-        "../license test.tfrecords")
+    image_test, label_test = tfrecord.read_and_decode("../license test.tfrecords", tfrecord.License)
     image_test_batch, label_test_batch = tf.train.shuffle_batch(
         [image_test, label_test], batch_size=BATCH_SIZE, capacity=CAPACITY, min_after_dequeue=100, num_threads=1)
 
     # 定义神经网络的输入。
-    x = tf.placeholder(
-        tf.float32, [None, INPUT_NODE], name='x-input')
+    x = tf.placeholder(tf.float32, [None, INPUT_NODE], name='x-input')
 
     # 定义神经网络的输出。
-    y_ = tf.placeholder(
-        tf.float32, [None, OUTPUT_NODE], name='y-input')
+    y_ = tf.placeholder(tf.float32, [None, OUTPUT_NODE], name='y-input')
 
     # 调用卷积神经网络。
     y_conv, keep_prob = deepnn(x)
 
     # 定义交叉熵损失函数。
     with tf.name_scope('loss'):
-        cross_entropy = tf.nn.softmax_cross_entropy_with_logits(labels=y_,
-                                                                logits=y_conv)
-    cross_entropy_mean = tf.reduce_mean(cross_entropy)
+        cross_entropy = tf.nn.softmax_cross_entropy_with_logits_v2(labels=y_, logits=y_conv)
+        cross_entropy_mean = tf.reduce_mean(cross_entropy)
+        tf.summary.scalar('loss', cross_entropy_mean)
 
     # 设置指数衰减学习率。学习率 = learning_rate * decay_rate^(global_step/decay_steps)
     with tf.name_scope('adam_optimizer'):
         global_step = tf.Variable(0)
         learning_rate = tf.train.exponential_decay(
-            learning_rate=1e-5, global_step=global_step, decay_steps=1000, decay_rate=0.98,
+            learning_rate=1e-5,
+            global_step=global_step,
+            decay_steps=1000,
+            decay_rate=0.98,
             staircase=True)
-        train_step = tf.train.AdamOptimizer(learning_rate).minimize(cross_entropy_mean,
-                                                                    global_step=global_step)
+        train_step = tf.train.AdamOptimizer(learning_rate).minimize(cross_entropy_mean, global_step=global_step)
+        tf.summary.histogram('learning_rate', learning_rate)
 
     with tf.name_scope('accuracy'):
-        correct_prediction = tf.equal(tf.argmax(y_conv, 1), tf.argmax(y_, 1))
-        correct_prediction = tf.cast(correct_prediction, tf.float32)
-    accuracy = tf.reduce_mean(correct_prediction)
-
-    graph_location = tempfile.mkdtemp()
-    print('Saving graph to: %s' % graph_location)
-    train_writer = tf.summary.FileWriter(graph_location)
-    train_writer.add_graph(tf.get_default_graph())
+        correct_prediction = tf.cast(tf.equal(tf.argmax(y_conv, 1), tf.argmax(y_, 1)), tf.float32)
+        accuracy = tf.reduce_mean(correct_prediction)
+        tf.summary.scalar('accuracy', accuracy)
 
     config = tf.ConfigProto()
     config.gpu_options.allow_growth = True
@@ -204,6 +215,9 @@ def main(_):
         coord = tf.train.Coordinator()
         threads = tf.train.start_queue_runners(sess=sess, coord=coord)
         ckpt = tf.train.get_checkpoint_state(MODEL_SAVE_PATH)
+        writer_test = tf.summary.FileWriter('../Logs/License_test', sess.graph)
+        writer_train = tf.summary.FileWriter('../Logs/License_train', sess.graph)
+        merged = tf.summary.merge_all()
         if ckpt and ckpt.model_checkpoint_path:
             # 加载模型。
             saver.restore(sess, ckpt.model_checkpoint_path)
@@ -216,24 +230,28 @@ def main(_):
         try:
             while not coord.should_stop():
                 global_step = 1 + global_step
-                xs, ys = sess.run([image_train_batch, label_train_batch])
+                train_xs, train_ys = sess.run([image_train_batch, label_train_batch])
                 if (global_step % 10 == 0) and global_step != 0:
                     xs_test, ys_test = sess.run([image_test_batch, label_test_batch])
-                    train_accuracy = accuracy.eval(feed_dict={
+                    test_accuracy, test_summary = sess.run([accuracy, merged], feed_dict={
                         x: xs_test, y_: ys_test, keep_prob: 1.0})
-                    print('step %d, training accuracy %g' % (global_step, train_accuracy))
+                    print('step %d, test accuracy %g' % (global_step, test_accuracy))
+                    writer_test.add_summary(test_summary, global_step)
                     saver.save(
                         sess, os.path.join(MODEL_SAVE_PATH, MODEL_NAME),
                         global_step=global_step)
-                _, test_accuracy = sess.run([train_step, accuracy], feed_dict={
-                    x: xs, y_: ys, keep_prob: 0.5})
-                print('test accuracy %g' % test_accuracy)
+                _, train_accuracy, train_summary = sess.run([train_step, accuracy, merged], feed_dict={
+                    x: train_xs, y_: train_ys, keep_prob: 0.5})
+                writer_train.add_summary(train_summary, global_step)
+                print('train accuracy %g' % train_accuracy)
         except tf.errors.OutOfRangeError as e:
             coord.request_stop(e)
             print('Done training -- epoch limit reached')
         finally:
             coord.request_stop()
             coord.join(threads)
+        writer_test.close()
+        writer_train.close()
 
 
 if __name__ == '__main__':

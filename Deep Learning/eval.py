@@ -50,10 +50,6 @@ def image_to_character(image_path):
         elif (line[i] > 300) and (top is None):
             top = i
 
-    '''for i in range(section):
-        plt.subplot(4, 4, i + 1), plt.imshow(para[i])
-    plt.show()'''
-
     for i in range(section):
         para[i] = np.array(para[i]).reshape(x, -1)
 
@@ -64,6 +60,11 @@ def image_to_character(image_path):
             del para[section - i - 1]
             index = index + 1
     section = section - index
+
+    '''for i in range(section):
+            plt.subplot(4, 4, i + 1), plt.imshow(para[i])
+    plt.show()'''
+
     return section, para
 
 
@@ -209,7 +210,9 @@ def eval(image_path):
 
                 x_sum = int(x_sum/num)
                 y_sum = int(y_sum/num)
-                cv2.imwrite(path + "0.jpg", image[x_sum:(x_sum + 120), y_sum:(y_sum + 480)])
+                image = image[x_sum:(x_sum + 120), y_sum:(y_sum + 480)]
+                image = cv2.resize(image, (136, 36), interpolation=cv2.INTER_AREA)
+                cv2.imwrite(path + "0.jpg", image)
             else:
                 print('No checkpoint file found')
 
@@ -217,6 +220,8 @@ def eval(image_path):
 def main(_):
     #evaluate_one_image("D:/final work/FinalWork-Ms.Wu/Project/Train/svm/has/test/0.jpg")
     eval("C:/Users/Hao/Desktop/temp/test.jpg")
+
+    #image_to_character("C:/Users/Hao/Desktop/temp/0.jpg")
 
 
 if __name__ == '__main__':

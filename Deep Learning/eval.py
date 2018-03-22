@@ -14,7 +14,7 @@ import tfrecord
 def image_to_character(image_path):
     image = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
     ret3, image = cv2.threshold(image, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)          # 二值化处理
-    image = cv2.equalizeHist(image)                                                         # 均值化处理
+    image = cv2.equalizeHist(image)                                                          # 均值化处理
 
     (x, y) = image.shape
 
@@ -60,6 +60,19 @@ def image_to_character(image_path):
             del para[section - i - 1]
             index = index + 1
     section = section - index
+
+    para.remove([])
+    for i in range(section):
+        (x, y) = para[i].shape
+        if x > y:
+            para[i] = cv2.copyMakeBorder(para[i], 0, 0, int((x - y) / 2), int((x - y) / 2), cv2.BORDER_CONSTANT,
+                                         value=[0, 0, 0])
+        elif x < y:
+            para[i] = cv2.copyMakeBorder(para[i], int((y - x) / 2), int((y - x) / 2), 0, 0, cv2.BORDER_CONSTANT,
+                                         value=[0, 0, 0])
+        elif x == y:
+            para[i] = para[i]
+        para[i] = cv2.resize(para[i], (20, 20), interpolation=cv2.INTER_AREA)
 
     '''for i in range(section):
             plt.subplot(4, 4, i + 1), plt.imshow(para[i])
@@ -119,18 +132,7 @@ def evaluate_one_image(image_path):
     section, para = image_to_character(image_path)
     result = ""
     with tf.Graph().as_default():
-        para.remove([])
         for i in range(section):
-            (x, y) = para[i].shape
-            if x > y:
-                para[i] = cv2.copyMakeBorder(para[i], 0, 0, int((x - y) / 2), int((x - y) / 2), cv2.BORDER_CONSTANT,
-                                             value=[0, 0, 0])
-            elif x < y:
-                para[i] = cv2.copyMakeBorder(para[i], int((y - x) / 2), int((y - x) / 2), 0, 0, cv2.BORDER_CONSTANT,
-                                             value=[0, 0, 0])
-            elif x == y:
-                para[i] = para[i]
-            para[i] = cv2.resize(para[i], (20, 20), interpolation=cv2.INTER_AREA)
             para[i] = tf.reshape(para[i], [20*20])
 
         x = tf.placeholder(

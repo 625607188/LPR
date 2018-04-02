@@ -11,64 +11,59 @@ import inference
 import tfrecord
 
 
-def image_to_character(image_path):
+def image_to_character1(image_path):
     image = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
-    ret3, image = cv2.threshold(image, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)          # 二值化处理
+    _, image = cv2.threshold(image, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)          # 二值化处理
     image = cv2.equalizeHist(image)                                                          # 均值化处理
 
-    (x, y) = image.shape
+    (y, x) = image.shape
 
     image = list(image)                             # 行处理
-    line = [0] * x
+    line = [0] * y
     sum = 0
-    for i in range(x):
-        for l in range(y):
+    for i in range(y):
+        for l in range(x):
             line[i] += image[i][l]
         sum += line[i]
 
-    for i in range(x):
-        if line[x - i - 1] < (sum / x / 2):
-            del image[x - i - 1]
+    for i in range(y):
+        if line[y - i - 1] < (sum / y / 2):
+            del image[y - i - 1]
     image = np.array(image)
 
-    (x, y) = image.shape                            # 列处理
-    line = [0] * y
+    (y, x) = image.shape                            # 列处理
+    line = [0] * x
     para = [[]]
-    section = 0
     top = None
-    for i in range(y):
+    for i in range(x):
         line[i] = 0
-        for l in range(x):
+        for l in range(y):
             line[i] += image[l][i]
         if (line[i] < 300) and (top is not None):
             bottom = i
-            for m in range(x):
-                para[section].append(image[m][top:bottom])
+            for m in range(y):
+                para[-1].append(image[m][top:bottom])
             para.append([])
-            section += 1
             top = None
         elif (line[i] > 300) and (top is None):
             top = i
 
-    for i in range(section):
-        para[i] = np.array(para[i]).reshape(x, -1)
+    for i in range(len(para)):
+        para[i] = np.array(para[i])
 
-    index = 0
-    for i in range(section):
-        temp = para[section - i - 1].sum()
-        if temp < 5000:
-            del para[section - i - 1]
-            index = index + 1
-    section = section - index
+    for i in range(len(para)-1,  -1,  -1):
+        temp = sum(para[i])
+        if temp < 10000:
+            del para[i]
 
     para.remove([])
-    for i in range(section):
-        (x, y) = para[i].shape
-        if x > y:
-            para[i] = cv2.copyMakeBorder(para[i], 0, 0, int((x - y) / 2), int((x - y) / 2), cv2.BORDER_CONSTANT,
+    for i in range(len(para)):
+        (y, x) = para[i].shape
+        if y > x:
+            para[i] = cv2.copyMakeBorder(para[i], 0, 0, int((y - x) / 2), int((y - x) / 2), cv2.BORDER_CONSTANT,
                                          value=[0, 0, 0])
-        elif x < y:
-            para[i] = cv2.copyMakeBorder(para[i], int((y - x) / 2), int((y - x) / 2), 0, 0, cv2.BORDER_CONSTANT,
+        elif y < x:
+            para[i] = cv2.copyMakeBorder(para[i], int((x - y) / 2), int((x - y) / 2), 0, 0, cv2.BORDER_CONSTANT,
                                          value=[0, 0, 0])
         elif x == y:
             para[i] = para[i]
@@ -78,7 +73,82 @@ def image_to_character(image_path):
             plt.subplot(4, 4, i + 1), plt.imshow(para[i])
     plt.show()'''
 
-    return section, para
+    return para
+
+
+def image_to_character2(image_path):
+    image = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
+    ret3, image = cv2.threshold(image, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)          # 二值化处理
+    image0 = cv2.equalizeHist(image)                                                          # 均值化处理
+
+    (y, x) = image0.shape
+    column = list(map(sum, image0))  # 删除头和尾的行空白
+    for i in range(y):
+        if column[i] > 255 * 5:
+            start = i
+            break
+    for i in list(range(y - 1, -1, -1)):
+        if column[i] > 255 * 5:
+            end = i
+            break
+    delete = list(range(0, start)) + list(range(end, y))
+    for i in range(y):
+        if column[i] > 255 * x * 4 / 5:
+            delete.append(i)
+    image1 = np.delete(image0, list(set(delete)), axis=0)
+
+    (y, x) = image1.shape
+    column = list(map(sum, zip(*image1)))  # 删除头和尾的列空白
+    for i in range(x):
+        if column[i] > 255 * 2:
+            start = i
+            break
+    for i in list(range(x - 1, -1, -1)):
+        if column[i] > 255 * 2:
+            end = i
+            break
+    delete = list(range(0, start)) + list(range(end, x))
+    for i in range(x):
+        if column[i] > 255 * y * 9 / 10:
+            delete.append(i)
+    image2 = np.delete(image1, list(set(delete)), axis=1)
+
+    (y, x) = image2.shape
+    column = list(map(sum, zip(*image2)))  # 分割字符
+    total = sum(column)
+    start, end = (0, x - 1)
+    para = []
+    while start is not x - 1:
+        flag = 0
+        for l in range(start, end):
+            if column[l] > total / x / 3:
+                flag = 1
+            if column[l] < total / x / 3 and flag:
+                end = l
+                break
+        para.append([temp[start:end] for temp in image2])
+        start, end = (end, x - 1)
+        if sum(sum(para[-1])) < total / 7 / 7 / 5:
+            del para[-1]
+
+    for i in range(len(para)):
+        para[i] = np.array(para[i])
+        (y, x) = para[i].shape
+        if y > x:
+            para[i] = cv2.copyMakeBorder(para[i], 0, 0, int((y - x) / 2), int((y - x) / 2), cv2.BORDER_CONSTANT,
+                                         value=[0, 0, 0])
+        elif y < x:
+            para[i] = cv2.copyMakeBorder(para[i], int((x - y) / 2), int((x - y) / 2), 0, 0, cv2.BORDER_CONSTANT,
+                                         value=[0, 0, 0])
+        elif x == y:
+            para[i] = para[i]
+        para[i] = cv2.resize(para[i], (20, 20), interpolation=cv2.INTER_AREA)
+
+    '''for i in range(section):
+            plt.subplot(4, 4, i + 1), plt.imshow(para[i])
+    plt.show()'''
+
+    return para
 
 
 def evaluate_one_character(image_path):
@@ -129,10 +199,10 @@ def get_one_image(image_path):
 
 
 def evaluate_one_image(image_path):
-    section, para = image_to_character(image_path)
+    para = image_to_character1(image_path)
     result = ""
     with tf.Graph().as_default():
-        for i in range(section):
+        for i in range(len(para)):
             para[i] = tf.reshape(para[i], [20*20])
 
         x = tf.placeholder(
@@ -153,7 +223,7 @@ def evaluate_one_image(image_path):
                 # 通过文件名得到模型保存时迭代的轮数。
                 global_step = ckpt.model_checkpoint_path.split('/')[-1].split('-')[-1]
                 print("Loading success, global_step is %s " % global_step)
-                for i in range(section):
+                for i in range(len(para)):
                     xs = sess.run([para[i]])
                     prediction = int(pre.eval(feed_dict={x: xs, keep_prob: 1.0}))
                     if 'zh_zhe' == tfrecord.character_classes[prediction]:

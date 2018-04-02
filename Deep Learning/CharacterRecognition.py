@@ -226,7 +226,7 @@ def main(_):
             saver.restore(sess, ckpt.model_checkpoint_path)
             # 通过文件名得到模型保存时迭代的轮数。
             global_step = int(ckpt.model_checkpoint_path.split('/')[-1].split('-')[-1])
-            print("Loading success, global_step is %d " % global_step)
+            print("Loading success, global_step is %d" % global_step)
         else:
             global_step = 0
             print('No checkpoint file found')

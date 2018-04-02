@@ -23,7 +23,7 @@ class MainWindow(QMainWindow,  Ui_MainWindow):
             self.getresult(image_path)
 
     def getcharacter(self, image_path):
-        section, para = image_to_character(image_path)
+        para = image_to_character1(image_path)
         path = ""
         self.char0.clear()
         self.char1.clear()
@@ -32,37 +32,37 @@ class MainWindow(QMainWindow,  Ui_MainWindow):
         self.char4.clear()
         self.char5.clear()
         self.char6.clear()
-        if 0 < section:
+        if 0 < len(para):
             path = "temp.jpg"
             cv2.imwrite(path,  para[0])
             paragraph = QPixmap(path)
             self.char0.setPixmap(paragraph)
-        if 1 < section:
+        if 1 < len(para):
             path = "temp.jpg"
             cv2.imwrite(path,  para[1])
             paragraph = QPixmap(path)
             self.char1.setPixmap(paragraph)
-        if 2 < section:
+        if 2 < len(para):
             path = "temp.jpg"
             cv2.imwrite(path,  para[2])
             paragraph = QPixmap(path)
             self.char2.setPixmap(paragraph)
-        if 3 < section:
+        if 3 < len(para):
             path = "temp.jpg"
             cv2.imwrite(path,  para[3])
             paragraph = QPixmap(path)
             self.char3.setPixmap(paragraph)
-        if 4 < section:
+        if 4 < len(para):
             path = "temp.jpg"
             cv2.imwrite(path,  para[4])
             paragraph = QPixmap(path)
             self.char4.setPixmap(paragraph)
-        if 5 < section:
+        if 5 < len(para):
             path = "temp.jpg"
             cv2.imwrite(path,  para[5])
             paragraph = QPixmap(path)
             self.char5.setPixmap(paragraph)
-        if 6 < section:
+        if 6 < len(para):
             path = "temp.jpg"
             cv2.imwrite(path,  para[6])
             paragraph = QPixmap(path)

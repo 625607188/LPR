@@ -9,7 +9,7 @@ BATCH_SIZE = 4000                    # 一个训练batch中的训练数据个数
 CAPACITY = 20000 + BATCH_SIZE * 2
 
 # 配置神经网络的参数。
-  = 40*12*3
+INPUT_NODE  = 40*12*3
 OUTPUT_NODE = 2
 
 IMAGE_SIZE_L = 40

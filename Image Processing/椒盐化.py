@@ -3,7 +3,7 @@ import cv2
 import numpy as np
 import matplotlib.pyplot as plt
 
-class_path = 'D:/final work/FinalWork-Ms.Wu/Project/Train/annGray'
+class_path = 'D:/final work/FinalWork-Ms.Wu/Project/Train/temp--'
 
 def saltpepper(img,n):
     m=int((img.shape[0]*img.shape[1])*n)

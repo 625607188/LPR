@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import os
 import cv2
 import tensorflow as tf
 import numpy as np
@@ -14,7 +15,7 @@ import tfrecord
 def image_to_character1(image_path):
     image = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
     _, image = cv2.threshold(image, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)          # 二值化处理
-    image = cv2.equalizeHist(image)                                                          # 均值化处理
+    image = cv2.equalizeHist(image)                                                       # 均值化处理
 
     (y, x) = image.shape
 
@@ -104,23 +105,23 @@ def image_to_character2(image_path):
     total = sum(column)
     start, end = (0, x - 1)
     para = []
-    while start is not x - 1:
+    while start < x - 1:
         flag = 0
         for i in range(start, end):
-            if column[i] > 255 * 2:
+            if column[i] > 255 * 1:
                 flag = 1
-            if column[i] < 255 * 2 and flag:
+            if column[i] < 255 * 1 and flag:
                 end = i + 1
                 if end > x:
                     end = x
                 break
         para.append([temp[start:end] for temp in image2])
         start, end = (end, x - 1)
-        if sum(sum(para[-1])) < total / 7 / 7 / 5:
+        para[-1] = np.array(para[-1])
+        if para[-1].sum() < total / 7 / 5:
             del para[-1]
 
     for i in range(len(para)):
-        para[i] = np.array(para[i])
         (y, x) = para[i].shape
         if y > x:
             para[i] = cv2.copyMakeBorder(para[i], 0, 0, int((y - x) / 2), int((y - x) / 2), cv2.BORDER_CONSTANT,
@@ -131,6 +132,7 @@ def image_to_character2(image_path):
         elif x == y:
             para[i] = para[i]
         para[i] = cv2.resize(para[i], (20, 20), interpolation=cv2.INTER_AREA)
+
     '''for i in range(section):
             plt.subplot(4, 4, i + 1), plt.imshow(para[i])
     plt.show()'''
@@ -315,9 +317,30 @@ def eval(image_path):
 
 def main(_):
     #evaluate_one_image("D:/final work/FinalWork-Ms.Wu/Project/Train/svm/has/test/0.jpg")
-    eval("C:/Users/Hao/Desktop/temp/test.jpg")
-
+    #eval("C:/Users/Hao/Desktop/temp/test.jpg")
     #image_to_character("C:/Users/Hao/Desktop/temp/0.jpg")
+
+    '''image_path = "C:/Users/Hao/Desktop/test/"
+    path = "D:/final work/FinalWork-Ms.Wu/Project/Train/temp/"
+    a = 0
+    for name in os.listdir(image_path):
+        if ".jpg" in name:
+            print(image_path + name)
+            para = image_to_character2(image_path + name)
+            for i in para:
+                cv2.imwrite(path + str(a) + '.jpg', i)
+                print(path + str(a) + '.jpg')
+                a = a + 1'''
+
+    image_path = "C:/Users/Hao/Desktop/test/"
+    path = "D:/final work/FinalWork-Ms.Wu/Project/Train/temp/"
+    result_path = "D:/final work/FinalWork-Ms.Wu/temp/"
+    for name in os.listdir(path):
+        if ".jpg" in name:
+            para = cv2.imread(path + name, cv2.IMREAD_GRAYSCALE)
+            result = evaluate_characters([para])
+            cv2.imwrite(result_path + result + '/' + name, para)
+            print(result_path + result + '/' + name)
 
 
 if __name__ == '__main__':

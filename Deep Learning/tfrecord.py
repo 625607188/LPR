@@ -124,8 +124,8 @@ def read_and_decode(filename, character_or_license):
 
 
 def main(_):
-    create_record(License, Train)
-    create_record(License, Test)
+    create_record(Character, Train)
+    #create_record(License, Test)
     '''create_record(Character, Test)
     create_record(License, Train)
     create_record(License, Test)'''

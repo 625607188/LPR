@@ -19,13 +19,21 @@ class MainWindow(QMainWindow,  Ui_MainWindow):
         image_path,  _ = QFileDialog.getOpenFileName(self,  "打开图片",  "../Train/svm/has/train/",  "Image file (*jpg)")
         if image_path:
             self.image = cv2.imread(image_path, cv2.IMREAD_COLOR)
-            self.image = cv2.resize(self.image,  (400, 300))
-            self.image = cv2.cvtColor(self.image, cv2.COLOR_BGR2RGB)
+            self.preprocessimage()
             height, width, _ = self.image.shape
             self.image_QImage = QImage(self.image.data, width, height, width*3, QImage.Format_RGB888)
             self.photo.setPixmap(QPixmap.fromImage(self.image_QImage))
             #self.getcharacter(image_path)
             #self.getresult()
+    
+    def preprocessimage(self):
+        height, width, _ = self.image.shape
+        if 300/400 > height/width:
+            self.image = self.image[0:height, int(width/2-height/2/300*400):int(width/2+height/2/300*400)]
+        elif 300/400 < height/width:
+            self.image = self.image[int(height/2-width/2/400*300):int(height/2+width/2/400*300), 0:width]
+        self.image = cv2.resize(self.image,  (400, 300))
+        self.image = cv2.cvtColor(self.image, cv2.COLOR_BGR2RGB)
 
     def getcharacter(self, image_path):
         self.para = eval.image_to_character2(image_path)

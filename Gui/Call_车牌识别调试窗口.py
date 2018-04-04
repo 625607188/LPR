@@ -1,9 +1,7 @@
-import os
 import sys
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
-import numpy as np
 import cv2
 from Ui_车牌识别调试窗口 import Ui_MainWindow
 
@@ -22,11 +20,11 @@ class MainWindow(QMainWindow,  Ui_MainWindow):
         if image_path:
             self.image = cv2.imread(image_path, cv2.IMREAD_COLOR)
             self.image = cv2.cvtColor(self.image, cv2.COLOR_BGR2RGB)
-            height, width, bytesPerComponent = self.image.shape
+            height, width, _ = self.image.shape
             self.image_QImage = QImage(self.image.data, width, height, QImage.Format_RGB888)
             self.photo.setPixmap(QPixmap.fromImage(self.image_QImage))
             self.getcharacter()
-            #self.getresult()
+            self.getresult()
 
     def getcharacter(self):
         self.para = eval.image_to_character2(self.image)

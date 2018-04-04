@@ -23,7 +23,7 @@ class Ui_MainWindow(object):
         self.photo.setScaledContents(True)
         self.photo.setObjectName("photo")
         self.choose_image = QtWidgets.QPushButton(self.groupBox)
-        self.choose_image.setGeometry(QtCore.QRect(320, 330, 75, 23))
+        self.choose_image.setGeometry(QtCore.QRect(330, 330, 75, 23))
         self.choose_image.setObjectName("choose_image")
         self.groupBox_2 = QtWidgets.QGroupBox(self.centralWidget)
         self.groupBox_2.setGeometry(QtCore.QRect(450, 30, 261, 141))

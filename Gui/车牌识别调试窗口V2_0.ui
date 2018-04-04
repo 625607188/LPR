@@ -45,7 +45,7 @@
     <widget class="QPushButton" name="choose_image">
      <property name="geometry">
       <rect>
-       <x>320</x>
+       <x>330</x>
        <y>330</y>
        <width>75</width>
        <height>23</height>

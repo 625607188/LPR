@@ -63,10 +63,10 @@ def image_to_character1(image_path):
     return para
 
 
-def image_to_character2(image_path):
-    image = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
-    ret3, image = cv2.threshold(image, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)          # 二值化处理
-    image0 = cv2.equalizeHist(image)                                                         # 均值化处理
+def image_to_character2(image):
+    image = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
+    _, image = cv2.threshold(image, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)            # 二值化处理
+    image0 = cv2.equalizeHist(image)                                                        # 均值化处理
 
     (y, x) = image0.shape
     column = list(map(sum, image0))  # 删除头和尾的行空白

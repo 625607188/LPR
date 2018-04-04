@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>712</width>
+    <width>741</width>
     <height>422</height>
    </rect>
   </property>
@@ -17,22 +17,22 @@
    <widget class="QGroupBox" name="groupBox">
     <property name="geometry">
      <rect>
-      <x>20</x>
+      <x>30</x>
       <y>30</y>
-      <width>411</width>
+      <width>421</width>
       <height>361</height>
      </rect>
     </property>
     <property name="title">
      <string>待识别的图片</string>
     </property>
-    <widget class="QLabel" name="image">
+    <widget class="QLabel" name="photo">
      <property name="geometry">
       <rect>
        <x>9</x>
        <y>20</y>
-       <width>391</width>
-       <height>301</height>
+       <width>400</width>
+       <height>300</height>
       </rect>
      </property>
      <property name="text">
@@ -59,7 +59,7 @@
    <widget class="QGroupBox" name="groupBox_2">
     <property name="geometry">
      <rect>
-      <x>430</x>
+      <x>450</x>
       <y>30</y>
       <width>261</width>
       <height>141</height>
@@ -88,7 +88,7 @@
    <widget class="QGroupBox" name="groupBox_3">
     <property name="geometry">
      <rect>
-      <x>430</x>
+      <x>450</x>
       <y>163</y>
       <width>261</width>
       <height>121</height>
@@ -183,7 +183,7 @@
    <widget class="QGroupBox" name="groupBox_4">
     <property name="geometry">
      <rect>
-      <x>430</x>
+      <x>450</x>
       <y>276</y>
       <width>261</width>
       <height>115</height>

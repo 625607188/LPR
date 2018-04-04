@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE Project SYSTEM "Project-6.0.dtd">
 <!-- eric project file for project DeBug -->
-<!-- Saved: 2018-04-03, 19:00:54 -->
+<!-- Saved: 2018-04-04, 00:20:03 -->
 <!-- Copyright (C) 2018 ,  -->
 <Project version="6.0">
   <Language></Language>
@@ -14,14 +14,14 @@
   <Eol index="0"/>
   <Sources>
     <Source>Call_车牌识别调试窗口.py</Source>
-    <Source>Call_车牌识别调试窗口V2.0.py</Source>
+    <Source>Call_车牌识别调试窗口V2_0.py</Source>
     <Source>Ui_车牌识别调试窗口.py</Source>
-    <Source>Ui_车牌识别调试窗口V2.0.py</Source>
+    <Source>Ui_车牌识别调试窗口V2_0.py</Source>
     <Source>__init__.py</Source>
   </Sources>
   <Forms>
     <Form>车牌识别调试窗口.ui</Form>
-    <Form>车牌识别调试窗口V2.0.ui</Form>
+    <Form>车牌识别调试窗口V2_0.ui</Form>
   </Forms>
   <Vcs>
     <VcsType>None</VcsType>

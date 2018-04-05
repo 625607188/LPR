@@ -16,7 +16,7 @@ class MainWindow(QMainWindow,  Ui_MainWindow):
         self.setupUi(self)
     
     def getimage(self):
-        image_path,  _ = QFileDialog.getOpenFileName(self,  "打开图片",  "../Train/svm/has/train/",  "Image file (*jpg)")
+        image_path,  _ = QFileDialog.getOpenFileName(self,  "打开图片",  "C:/Users/Hao/Desktop/test/",  "Image file (*jpg)")
         if image_path:
             self.image = cv2.imread(image_path, cv2.IMREAD_COLOR)
             self.image = cv2.cvtColor(self.image, cv2.COLOR_BGR2RGB)

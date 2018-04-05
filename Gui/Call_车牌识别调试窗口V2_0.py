@@ -13,30 +13,42 @@ class MainWindow(QMainWindow,  Ui_MainWindow):
     def __init__(self,  parent=None):
         super(MainWindow,  self).__init__(parent)
         self.para = []
+        self.image1 = []
+        self.image2 = []
+        self.image1_QImage = QImage()
+        self.image2_QImage = QImage()
         self.setupUi(self)
     
     def getimage(self):
         image_path,  _ = QFileDialog.getOpenFileName(self,  "打开图片",  "../Train/svm/has/train/",  "Image file (*jpg)")
         if image_path:
-            self.image = cv2.imread(image_path, cv2.IMREAD_COLOR)
+            self.image1 = cv2.imread(image_path, cv2.IMREAD_COLOR)
             self.preprocessimage()
-            height, width, _ = self.image.shape
-            self.image_QImage = QImage(self.image.data, width, height, width*3, QImage.Format_RGB888)
-            self.photo.setPixmap(QPixmap.fromImage(self.image_QImage))
-            #self.getcharacter(image_path)
-            #self.getresult()
+            height, width, _ = self.image1.shape
+            self.image1_QImage = QImage(self.image1.data, width, height, width*3, QImage.Format_RGB888)
+            self.photo.setPixmap(QPixmap.fromImage(self.image1_QImage))
+            self.getlicense()
+            self.getcharacter()
+            self.getresult()
     
     def preprocessimage(self):
-        height, width, _ = self.image.shape
+        height, width, _ = self.image1.shape
         if 300/400 > height/width:
-            self.image = self.image[0:height, int(width/2-height/2/300*400):int(width/2+height/2/300*400)]
+            self.image1 = self.image1[0:height, int(width/2-height/2/300*400):int(width/2+height/2/300*400)]
         elif 300/400 < height/width:
-            self.image = self.image[int(height/2-width/2/400*300):int(height/2+width/2/400*300), 0:width]
-        self.image = cv2.resize(self.image,  (400, 300))
-        self.image = cv2.cvtColor(self.image, cv2.COLOR_BGR2RGB)
+            self.image1 = self.image1[int(height/2-width/2/400*300):int(height/2+width/2/400*300), 0:width]
+        self.image1 = cv2.resize(self.image1,  (400, 300))
+        self.image1 = cv2.cvtColor(self.image1, cv2.COLOR_BGR2RGB)
 
-    def getcharacter(self, image_path):
-        self.para = eval.image_to_character2(image_path)
+    def getlicense(self):
+        self.image2 = eval.evaluate_one_photo(cv2.cvtColor(self.image1, cv2.COLOR_RGB2BGR))
+        self.image2 = cv2.cvtColor(self.image2, cv2.COLOR_BGR2RGB)
+        height, width, _ = self.image2.shape
+        self.image2_QImage = QImage(self.image2.data, width, height, width * 3, QImage.Format_RGB888)
+        self.license.setPixmap(QPixmap.fromImage(self.image2_QImage))
+
+    def getcharacter(self):
+        self.para = eval.image_to_character2(self.image2)
         path = ""
         self.char0.clear()
         self.char1.clear()

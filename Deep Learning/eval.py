@@ -4,7 +4,6 @@ import cv2
 import tensorflow as tf
 import numpy as np
 import matplotlib.pyplot as plt
-from PIL import Image
 # 加载inference.py和train.py中定义的常量和函数。
 import CharacterRecognition
 import LicenseRecognition
@@ -216,56 +215,9 @@ def evaluate_characters(paragraphs):
     return result
 
 
-def get_one_image(image_path):
-    image = Image.open(image_path).convert('L')
-    image = image.resize((20, 20))
-    image = np.array(image)
-    image = 255 - image
-    return image
-
-
-def evaluate_one_image(image_path):
-    para = image_to_character1(image_path)
-    result = ""
-    with tf.Graph().as_default():
-        for i in range(len(para)):
-            para[i] = tf.reshape(para[i], [20*20])
-
-        x = tf.placeholder(
-            tf.float32, [None, CharacterRecognition.INPUT_NODE], name='x-input')
-        # 直接使用inference.py中定义的前向传播过程。
-        y_conv, keep_prob = CharacterRecognition.deepnn(x)
-        y_soft = tf.nn.softmax(y_conv)
-        pre = tf.argmax(y_soft, 1)
-
-        saver = tf.train.Saver()
-        with tf.Session() as sess:
-            tf.global_variables_initializer().run()
-            print("Reading checkpoints...")
-            ckpt = tf.train.get_checkpoint_state(CharacterRecognition.MODEL_SAVE_PATH)
-            if ckpt and ckpt.model_checkpoint_path:
-                # 加载模型。
-                saver.restore(sess, ckpt.model_checkpoint_path)
-                # 通过文件名得到模型保存时迭代的轮数。
-                global_step = ckpt.model_checkpoint_path.split('/')[-1].split('-')[-1]
-                print("Loading success, global_step is %s " % global_step)
-                for i in range(len(para)):
-                    xs = sess.run([para[i]])
-                    prediction = int(pre.eval(feed_dict={x: xs, keep_prob: 1.0}))
-                    if 'zh_zhe' == tfrecord.character_classes[prediction]:
-                        result = result + '浙'
-                    else:
-                        result = result + tfrecord.character_classes[prediction]
-                    print(tfrecord.character_classes[prediction])
-            else:
-                print('No checkpoint file found')
-    return result
-
-
-def eval(image_path):
+def evaluate_one_photo(image):
     path = "C:/Users/Hao/Desktop/temp/"
-    image = cv2.imread(image_path, cv2.IMREAD_COLOR)
-    x_, y_, _ = image.shape
+    y_, x_ = (300,  400)
     x_sum = 0
     y_sum = 0
     num = 0
@@ -287,9 +239,65 @@ def eval(image_path):
                 # 通过文件名得到模型保存时迭代的轮数。
                 global_step = ckpt.model_checkpoint_path.split('/')[-1].split('-')[-1]
                 print("Loading success, global_step is %s " % global_step)
-                for i in range(int((x_ - 120)/10)-44):
-                    for l in range(int((y_ - 480)/10)):
-                        img = image[((i+44)*10):(((i+44)*10) + 120), (l*10):((l*10) + 480)]
+                for i in range(120,  170, 5):
+                    for l in range(100,  200,  10):
+                        img = image[i:(i+12*3), l:(l+40*3)]
+                        img = cv2.resize(img, (40, 12), interpolation=cv2.INTER_AREA)
+                        img = np.array(img)
+                        img = tf.reshape(img, [40 * 12 * 3])
+
+                        xs = sess.run([img])
+                        prediction = int(pre.eval(feed_dict={x: xs, keep_prob: 1.0}))
+                        '''if '0' == tfrecord.license_classes[prediction]:
+                            print("x is %d, y is %d, pre is %d" % i, l, prediction)
+                        else:
+                            print("x is %d, y is %d, pre is %d" % i, l, prediction)'''
+                        print("x is %d, y is %d, pre is %d" % (i, l, prediction))
+                        if '0' == tfrecord.license_classes[prediction]:
+                            num += 1
+                            x_sum += l
+                            y_sum += i
+            else:
+                print('No checkpoint file found')
+                return 0
+    x_sum = int(x_sum / num)
+    y_sum = int(y_sum / num)
+    print(x_sum,  y_sum)
+    image = image[y_sum:(y_sum + 48), x_sum:(x_sum + 160)]
+    print(image)
+    image = cv2.resize(np.array(image), (136, 36))
+    cv2.imwrite(path + "1.jpg", image)
+    return image
+
+
+def eval(image_path):
+    path = "C:/Users/Hao/Desktop/temp/"
+    image = cv2.imread(image_path, cv2.IMREAD_COLOR)
+    y_, x_ = image.shape
+    x_sum = 0
+    y_sum = 0
+    num = 0
+    with tf.Graph().as_default():
+        x = tf.placeholder(tf.float32, [None, LicenseRecognition.INPUT_NODE], name='x-input')
+        # 直接使用inference.py中定义的前向传播过程。
+        y_conv, keep_prob = LicenseRecognition.deepnn(x)
+        y_soft = tf.nn.softmax(y_conv)
+        pre = tf.argmax(y_soft, 1)
+
+        saver = tf.train.Saver()
+        with tf.Session() as sess:
+            tf.global_variables_initializer().run()
+            print("Reading checkpoints...")
+            ckpt = tf.train.get_checkpoint_state(LicenseRecognition.MODEL_SAVE_PATH)
+            if ckpt and ckpt.model_checkpoint_path:
+                # 加载模型。
+                saver.restore(sess, ckpt.model_checkpoint_path)
+                # 通过文件名得到模型保存时迭代的轮数。
+                global_step = ckpt.model_checkpoint_path.split('/')[-1].split('-')[-1]
+                print("Loading success, global_step is %s " % global_step)
+                for i in range(int(y_ - 48)):
+                    for l in range(int(x_ - 160)):
+                        img = image[i:(i+48), l:(l+160)]
                         img = cv2.resize(img, (40, 12), interpolation=cv2.INTER_AREA)
                         img = np.array(img)
                         img = tf.reshape(img, [40 * 12 * 3])

@@ -11,8 +11,7 @@ import inference
 import tfrecord
 
 
-def image_to_character1(image_path):
-    image = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
+def image_to_character1(image):
     _, image = cv2.threshold(image, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)          # 二值化处理
     image = cv2.equalizeHist(image)                                                       # 均值化处理
 
@@ -83,7 +82,7 @@ def image_to_character2(image):
             delete.append(i)
     image1 = np.delete(image0, list(set(delete)), axis=0)
 
-    (y, x) = image1.shape
+    '''(y, x) = image1.shape
     column = list(map(sum, zip(*image1)))  # 删除头和尾的列空白
     for i in range(x):
         if column[i] > 0:
@@ -97,8 +96,9 @@ def image_to_character2(image):
     for i in range(x):
         if column[i] > 255 * y * 9 / 10:
             delete.append(i)
-    image2 = np.delete(image1, list(set(delete)), axis=1)
+    image2 = np.delete(image1, list(set(delete)), axis=1)'''
 
+    image2 = image1
     (y, x) = image2.shape
     column = list(map(sum, zip(*image2)))  # 分割字符
     total = sum(column)
@@ -216,8 +216,6 @@ def evaluate_characters(paragraphs):
 
 
 def evaluate_one_photo(image):
-    path = "C:/Users/Hao/Desktop/temp/"
-    y_, x_ = (300,  400)
     x_sum = 0
     y_sum = 0
     num = 0
@@ -248,11 +246,7 @@ def evaluate_one_photo(image):
 
                         xs = sess.run([img])
                         prediction = int(pre.eval(feed_dict={x: xs, keep_prob: 1.0}))
-                        '''if '0' == tfrecord.license_classes[prediction]:
-                            print("x is %d, y is %d, pre is %d" % i, l, prediction)
-                        else:
-                            print("x is %d, y is %d, pre is %d" % i, l, prediction)'''
-                        print("x is %d, y is %d, pre is %d" % (i, l, prediction))
+                        # print("x is %d, y is %d, pre is %d" % (i, l, prediction))
                         if '0' == tfrecord.license_classes[prediction]:
                             num += 1
                             x_sum += l
@@ -262,11 +256,8 @@ def evaluate_one_photo(image):
                 return 0
     x_sum = int(x_sum / num)
     y_sum = int(y_sum / num)
-    print(x_sum,  y_sum)
     image = image[y_sum:(y_sum + 48), x_sum:(x_sum + 160)]
-    print(image)
     image = cv2.resize(np.array(image), (136, 36))
-    cv2.imwrite(path + "1.jpg", image)
     return image
 
 

@@ -1,4 +1,3 @@
-import os
 import sys
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
@@ -49,7 +48,7 @@ class MainWindow(QMainWindow,  Ui_MainWindow):
 
     def getcharacter(self):
         self.para = eval.image_to_character2(self.image2)
-        path = ""
+        width, height = (20,  20)
         self.char0.clear()
         self.char1.clear()
         self.char2.clear()
@@ -58,42 +57,26 @@ class MainWindow(QMainWindow,  Ui_MainWindow):
         self.char5.clear()
         self.char6.clear()
         if 0 < len(self.para):
-            path = "temp.jpg"
-            cv2.imwrite(path,  self.para[0])
-            paragraph = QPixmap(path)
-            self.char0.setPixmap(paragraph)
+            self.char0_QImage = QImage(self.para[0].data, width, height, QImage.Format_Grayscale8)
+            self.char0.setPixmap(QPixmap.fromImage(self.char0_QImage))
         if 1 < len(self.para):
-            path = "temp.jpg"
-            cv2.imwrite(path,  self.para[1])
-            paragraph = QPixmap(path)
-            self.char1.setPixmap(paragraph)
+            self.char1_QImage = QImage(self.para[1].data, width, height, QImage.Format_Grayscale8)
+            self.char1.setPixmap(QPixmap.fromImage(self.char1_QImage))
         if 2 < len(self.para):
-            path = "temp.jpg"
-            cv2.imwrite(path,  self.para[2])
-            paragraph = QPixmap(path)
-            self.char2.setPixmap(paragraph)
+            self.char2_QImage = QImage(self.para[2].data, width, height, QImage.Format_Grayscale8)
+            self.char2.setPixmap(QPixmap.fromImage(self.char2_QImage))
         if 3 < len(self.para):
-            path = "temp.jpg"
-            cv2.imwrite(path,  self.para[3])
-            paragraph = QPixmap(path)
-            self.char3.setPixmap(paragraph)
+            self.char3_QImage = QImage(self.para[3].data, width, height, QImage.Format_Grayscale8)
+            self.char3.setPixmap(QPixmap.fromImage(self.char3_QImage))
         if 4 < len(self.para):
-            path = "temp.jpg"
-            cv2.imwrite(path,  self.para[4])
-            paragraph = QPixmap(path)
-            self.char4.setPixmap(paragraph)
+            self.char4_QImage = QImage(self.para[4].data, width, height, QImage.Format_Grayscale8)
+            self.char4.setPixmap(QPixmap.fromImage(self.char4_QImage))
         if 5 < len(self.para):
-            path = "temp.jpg"
-            cv2.imwrite(path,  self.para[5])
-            paragraph = QPixmap(path)
-            self.char5.setPixmap(paragraph)
+            self.char5_QImage = QImage(self.para[5].data, width, height, QImage.Format_Grayscale8)
+            self.char5.setPixmap(QPixmap.fromImage(self.char5_QImage))
         if 6 < len(self.para):
-            path = "temp.jpg"
-            cv2.imwrite(path,  self.para[6])
-            paragraph = QPixmap(path)
-            self.char6.setPixmap(paragraph)
-        if path:
-            os.remove(path)
+            self.char6_QImage = QImage(self.para[6].data, width, height, QImage.Format_Grayscale8)
+            self.char6.setPixmap(QPixmap.fromImage(self.char6_QImage))
 
     def getresult(self):
         result = eval.evaluate_characters(self.para)

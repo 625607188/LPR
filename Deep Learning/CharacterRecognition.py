@@ -8,7 +8,7 @@ import tfrecord
 
 
 BATCH_SIZE = 5000                    # 一个训练batch中的训练数据个数。数字越小时，训练过程越接近
-CAPACITY = 50000 + 2 * BATCH_SIZE
+CAPACITY = 100000 + 2 * BATCH_SIZE
 
 # 配置神经网络的参数。
 INPUT_NODE = 20*20
@@ -171,12 +171,12 @@ def main(_):
     image_train, label_train = tfrecord.read_and_decode(
         "../character train.tfrecords", tfrecord.Character)
     image_train_batch, label_train_batch = tf.train.shuffle_batch(
-        [image_train, label_train], batch_size=BATCH_SIZE, capacity=CAPACITY, min_after_dequeue=500, num_threads=1)
+        [image_train, label_train], batch_size=BATCH_SIZE, capacity=CAPACITY, min_after_dequeue=50000, num_threads=1)
 
     image_test, label_test = tfrecord.read_and_decode(
         "../character test.tfrecords", tfrecord.Character)
     image_test_batch, label_test_batch = tf.train.shuffle_batch(
-        [image_test, label_test], batch_size=BATCH_SIZE, capacity=CAPACITY, min_after_dequeue=500, num_threads=1)
+        [image_test, label_test], batch_size=BATCH_SIZE, capacity=CAPACITY, min_after_dequeue=2000, num_threads=1)
 
     # 定义神经网络的输入。
     x = tf.placeholder(tf.float32, [None, INPUT_NODE], name='x-input')

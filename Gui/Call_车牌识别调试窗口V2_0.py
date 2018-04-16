@@ -16,10 +16,17 @@ class MainWindow(QMainWindow,  Ui_MainWindow):
         self.image2 = []
         self.image1_QImage = QImage()
         self.image2_QImage = QImage()
+        self.char0_QImage = QImage()
+        self.char1_QImage = QImage()
+        self.char2_QImage = QImage()
+        self.char3_QImage = QImage()
+        self.char4_QImage = QImage()
+        self.char5_QImage = QImage()
+        self.char6_QImage = QImage()
         self.setupUi(self)
     
     def getimage(self):
-        image_path,  _ = QFileDialog.getOpenFileName(self,  "打开图片",  "../Train/svm/has/train/",  "Image file (*jpg)")
+        image_path,  _ = QFileDialog.getOpenFileName(self, "打开图片", "../Train/svm/has/train/",  "Image file (*jpg)")
         if image_path:
             self.image1 = cv2.imread(image_path, cv2.IMREAD_COLOR)
             self.preprocessimage()

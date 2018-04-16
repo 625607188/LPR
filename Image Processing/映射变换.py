@@ -3,7 +3,7 @@ import cv2
 import numpy as np
 import matplotlib.pyplot as plt
 
-'''class_path = 'C:/Users/Hao/Desktop/train/svm/has/train/2.jpg'
+'''class_path = 'D:/final work/FinalWork-Ms.Wu/Project/Train/annGray/zh_zhe/2.jpg'
 img = cv2.imread(class_path)
 rows,cols,_ = img.shape
 pts1 = np.float32([[2,5],[68,18],[5,20]])
@@ -22,7 +22,7 @@ plt.subplot(3, 1, 3), plt.imshow(res2)
 plt.show()'''
 
 
-class_path = 'C:/Users/Hao/Desktop/train/svm/no/train'
+class_path = 'D:/final work/FinalWork-Ms.Wu/Project/Train/annGray/zh_zhe'
 num = 0
 for img_name in os.listdir(class_path):
     num += 1

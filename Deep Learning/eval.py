@@ -238,8 +238,8 @@ def evaluate_one_photo(image):
                 global_step = ckpt.model_checkpoint_path.split('/')[-1].split('-')[-1]
                 print("Loading success, global_step is %s " % global_step)
                 for i in range(120,  170, 5):
-                    for l in range(100,  200,  10):
-                        img = image[i:(i+12*3), l:(l+40*3)]
+                    for l in range(50,  250,  5):
+                        img = image[i:(i+12*2), l:(l+40*2)]
                         img = cv2.resize(img, (40, 12), interpolation=cv2.INTER_AREA)
                         img = np.array(img)
                         img = tf.reshape(img, [40 * 12 * 3])
@@ -251,6 +251,7 @@ def evaluate_one_photo(image):
                             num += 1
                             x_sum += l
                             y_sum += i
+                            cv2.imwrite("C:/Users/Hao/Desktop/temp/" + str(num-1) + ".jpg", np.array(image[i:(i+12*3), l:(l+40*3)]))
             else:
                 print('No checkpoint file found')
                 return 0

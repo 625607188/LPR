@@ -216,9 +216,29 @@ def evaluate_characters(paragraphs):
 
 
 def evaluate_one_photo(image):
-    x_sum = 0
-    y_sum = 0
-    num = 0
+    lower_blue = np.array([100, 43, 46])
+    upper_blue = np.array([124, 255, 255])
+
+    lower_white = np.array([0, 0, 170])
+    upper_white = np.array([180, 30, 255])
+
+    hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
+    # get mask
+    mask1 = cv2.inRange(hsv, lower_blue, upper_blue)
+    mask2 = cv2.inRange(hsv, lower_white, upper_white)
+
+    end = cv2.bitwise_or(mask1, mask2)
+
+    img, contours, hierarchy = cv2.findContours(end, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+    coordinate = []
+    for i in contours:
+        if len(i) > 100:
+            x, y, w, h = cv2.boundingRect(i)
+            coordinate.append([x, y, w, h])
+            print(coordinate[-1])
+
+    licence = []
+
     with tf.Graph().as_default():
         x = tf.placeholder(tf.float32, [None, LicenseRecognition.INPUT_NODE], name='x-input')
         # 直接使用inference.py中定义的前向传播过程。
@@ -237,35 +257,30 @@ def evaluate_one_photo(image):
                 # 通过文件名得到模型保存时迭代的轮数。
                 global_step = ckpt.model_checkpoint_path.split('/')[-1].split('-')[-1]
                 print("Loading success, global_step is %s " % global_step)
-                for i in range(120,  170, 5):
-                    for l in range(50,  250,  5):
-                        img = image[i:(i+12*2), l:(l+40*2)]
+                if coordinate:
+                    for i in coordinate:
+                        (x_, y_, w_, h_) = i
+                        img = image[y_:(y_ + h_), x_:(x_ + w_)]
                         img = cv2.resize(img, (40, 12), interpolation=cv2.INTER_AREA)
                         img = np.array(img)
                         img = tf.reshape(img, [40 * 12 * 3])
 
                         xs = sess.run([img])
                         prediction = int(pre.eval(feed_dict={x: xs, keep_prob: 1.0}))
-                        # print("x is %d, y is %d, pre is %d" % (i, l, prediction))
+
                         if '0' == tfrecord.license_classes[prediction]:
-                            num += 1
-                            x_sum += l
-                            y_sum += i
-                            cv2.imwrite("C:/Users/Hao/Desktop/temp/" + str(num-1) + ".jpg", np.array(image[i:(i+12*3), l:(l+40*3)]))
+                            licence = image[y_:(y_ + h_), x_:(x_ + w_)]
+                            licence = cv2.resize(licence, (136, 36), interpolation=cv2.INTER_AREA)
             else:
                 print('No checkpoint file found')
                 return 0
-    x_sum = int(x_sum / num)
-    y_sum = int(y_sum / num)
-    image = image[y_sum:(y_sum + 48), x_sum:(x_sum + 160)]
-    image = cv2.resize(np.array(image), (136, 36))
-    return image
+    return licence
 
 
 def eval(image_path):
     path = "C:/Users/Hao/Desktop/temp/"
     image = cv2.imread(image_path, cv2.IMREAD_COLOR)
-    y_, x_ = image.shape
+    y_, x_, _ = image.shape
     x_sum = 0
     y_sum = 0
     num = 0
@@ -317,7 +332,7 @@ def eval(image_path):
 
 def main(_):
     #evaluate_one_image("D:/final work/FinalWork-Ms.Wu/Project/Train/svm/has/test/0.jpg")
-    #eval("C:/Users/Hao/Desktop/temp/test.jpg")
+    eval("C:/Users/Hao/Desktop/temp/test.jpg")
     #image_to_character("C:/Users/Hao/Desktop/temp/0.jpg")
 
     '''image_path = "C:/Users/Hao/Desktop/test/"
@@ -330,7 +345,7 @@ def main(_):
             for i in para:
                 cv2.imwrite(path + str(a) + '.jpg', i)
                 print(path + str(a) + '.jpg')
-                a = a + 1'''
+                a = a + 1
 
     image_path = "C:/Users/Hao/Desktop/test/"
     path = "D:/final work/FinalWork-Ms.Wu/Project/Train/temp/"
@@ -340,7 +355,7 @@ def main(_):
             para = cv2.imread(path + name, cv2.IMREAD_GRAYSCALE)
             result = evaluate_characters([para])
             cv2.imwrite(result_path + result + '/' + name, para)
-            print(result_path + result + '/' + name)
+            print(result_path + result + '/' + name)'''
 
 
 if __name__ == '__main__':

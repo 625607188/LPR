@@ -192,22 +192,14 @@
     <property name="title">
      <string>字符识别结果</string>
     </property>
-    <widget class="QLineEdit" name="result">
+    <widget class="QTextEdit" name="result">
      <property name="geometry">
       <rect>
-       <x>60</x>
-       <y>40</y>
-       <width>141</width>
-       <height>41</height>
+       <x>20</x>
+       <y>30</y>
+       <width>221</width>
+       <height>61</height>
       </rect>
-     </property>
-     <property name="font">
-      <font>
-       <pointsize>20</pointsize>
-      </font>
-     </property>
-     <property name="alignment">
-      <set>Qt::AlignCenter</set>
      </property>
     </widget>
    </widget>

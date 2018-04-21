@@ -1,4 +1,5 @@
 import sys
+import datetime
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 import cv2
@@ -14,6 +15,7 @@ class MainWindow(QMainWindow,  Ui_MainWindow):
         self.para = []
         self.image1 = []
         self.image2 = []
+        self.result_str = []
         self.image1_QImage = QImage()
         self.image2_QImage = QImage()
         self.char0_QImage = QImage()
@@ -47,7 +49,11 @@ class MainWindow(QMainWindow,  Ui_MainWindow):
         self.image1 = cv2.cvtColor(self.image1, cv2.COLOR_BGR2RGB)
 
     def getlicense(self):
-        self.image2 = eval.evaluate_one_photo(cv2.cvtColor(self.image1, cv2.COLOR_RGB2BGR))
+        x, y, w, h, self.image2 = eval.evaluate_one_photo(cv2.cvtColor(self.image1, cv2.COLOR_RGB2BGR))
+        cv2.rectangle(self.image1, (x, y), (x + w, y + h), (255, 0, 0), 5)
+        height, width, _ = self.image1.shape
+        self.image1_QImage = QImage(self.image1.data, width, height, width * 3, QImage.Format_RGB888)
+        self.photo.setPixmap(QPixmap.fromImage(self.image1_QImage))
         self.image2 = cv2.cvtColor(self.image2, cv2.COLOR_BGR2RGB)
         height, width, _ = self.image2.shape
         self.image2_QImage = QImage(self.image2.data, width, height, width * 3, QImage.Format_RGB888)
@@ -86,8 +92,8 @@ class MainWindow(QMainWindow,  Ui_MainWindow):
             self.char6.setPixmap(QPixmap.fromImage(self.char6_QImage))
 
     def getresult(self):
-        result = eval.evaluate_characters(self.para)
-        self.result.setText(result)
+        self.result_str.append(datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S') + "   " + eval.evaluate_characters(self.para))
+        self.result.insertPlainText(self.result_str[-1] + "\n")
 
 
 if __name__ == "__main__":

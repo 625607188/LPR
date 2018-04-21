@@ -271,10 +271,11 @@ def evaluate_one_photo(image):
                         if '0' == tfrecord.license_classes[prediction]:
                             licence = image[y_:(y_ + h_), x_:(x_ + w_)]
                             licence = cv2.resize(licence, (136, 36), interpolation=cv2.INTER_AREA)
+                            return x_, y_, w_, h_, licence
             else:
                 print('No checkpoint file found')
-                return 0
-    return licence
+                return 0, 0, 0, 0, 0
+    return 0, 0, 0, 0, 0
 
 
 def eval(image_path):

@@ -63,6 +63,7 @@ def image_to_character1(image):
 
 def image_to_character2(image):
     image = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
+    image = cv2.GaussianBlur(image, (5, 5), 1)
     _, image = cv2.threshold(image, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)            # 二值化处理
     image0 = cv2.equalizeHist(image)                                                        # 均值化处理
 
@@ -232,12 +233,9 @@ def evaluate_one_photo(image):
     img, contours, hierarchy = cv2.findContours(end, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
     coordinate = []
     for i in contours:
-        if len(i) > 100:
+        if len(i) > 50:
             x, y, w, h = cv2.boundingRect(i)
             coordinate.append([x, y, w, h])
-            print(coordinate[-1])
-
-    licence = []
 
     with tf.Graph().as_default():
         x = tf.placeholder(tf.float32, [None, LicenseRecognition.INPUT_NODE], name='x-input')

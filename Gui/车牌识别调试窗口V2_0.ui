@@ -45,7 +45,7 @@
     <widget class="QPushButton" name="choose_image">
      <property name="geometry">
       <rect>
-       <x>330</x>
+       <x>240</x>
        <y>330</y>
        <width>75</width>
        <height>23</height>
@@ -55,6 +55,19 @@
       <string>选择图片</string>
      </property>
     </widget>
+    <widget class="QPushButton" name="print_result">
+     <property name="geometry">
+      <rect>
+       <x>330</x>
+       <y>330</y>
+       <width>75</width>
+       <height>23</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>打印结果</string>
+     </property>
+    </widget>
    </widget>
    <widget class="QGroupBox" name="groupBox_2">
     <property name="geometry">
@@ -62,7 +75,7 @@
       <x>450</x>
       <y>30</y>
       <width>261</width>
-      <height>141</height>
+      <height>95</height>
      </rect>
     </property>
     <property name="title">
@@ -72,7 +85,7 @@
      <property name="geometry">
       <rect>
        <x>30</x>
-       <y>50</y>
+       <y>27</y>
        <width>200</width>
        <height>50</height>
       </rect>
@@ -89,9 +102,9 @@
     <property name="geometry">
      <rect>
       <x>450</x>
-      <y>163</y>
+      <y>117</y>
       <width>261</width>
-      <height>121</height>
+      <height>86</height>
      </rect>
     </property>
     <property name="title">
@@ -101,7 +114,7 @@
      <property name="geometry">
       <rect>
        <x>0</x>
-       <y>50</y>
+       <y>30</y>
        <width>261</width>
        <height>41</height>
       </rect>
@@ -180,25 +193,62 @@
      </layout>
     </widget>
    </widget>
-   <widget class="QGroupBox" name="groupBox_4">
+   <widget class="QGroupBox" name="groupBox_5">
     <property name="geometry">
      <rect>
       <x>450</x>
-      <y>276</y>
+      <y>195</y>
       <width>261</width>
-      <height>115</height>
+      <height>71</height>
      </rect>
     </property>
     <property name="title">
      <string>字符识别结果</string>
     </property>
-    <widget class="QTextEdit" name="result">
+    <widget class="QLabel" name="result">
+     <property name="geometry">
+      <rect>
+       <x>40</x>
+       <y>20</y>
+       <width>181</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <pointsize>14</pointsize>
+      </font>
+     </property>
+     <property name="layoutDirection">
+      <enum>Qt::LeftToRight</enum>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
+     </property>
+    </widget>
+   </widget>
+   <widget class="QGroupBox" name="groupBox_4">
+    <property name="geometry">
+     <rect>
+      <x>450</x>
+      <y>258</y>
+      <width>261</width>
+      <height>131</height>
+     </rect>
+    </property>
+    <property name="title">
+     <string>车牌统计</string>
+    </property>
+    <widget class="QTextEdit" name="results">
      <property name="geometry">
       <rect>
        <x>20</x>
        <y>30</y>
        <width>221</width>
-       <height>61</height>
+       <height>81</height>
       </rect>
      </property>
     </widget>
@@ -214,7 +264,7 @@
    <slot>getimage()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>386</x>
+     <x>296</x>
      <y>371</y>
     </hint>
     <hint type="destinationlabel">
@@ -223,8 +273,25 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>print_result</sender>
+   <signal>clicked()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>printresult()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>404</x>
+     <y>374</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>403</x>
+     <y>497</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>getimage()</slot>
+  <slot>printresult()</slot>
  </slots>
 </ui>

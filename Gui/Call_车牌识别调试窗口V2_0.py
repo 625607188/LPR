@@ -28,17 +28,17 @@ class MainWindow(QMainWindow,  Ui_MainWindow):
         self.setupUi(self)
     
     def getimage(self):
-        image_path,  _ = QFileDialog.getOpenFileName(self, "打开图片", "../Train/svm/has/train/",  "Image file (*jpg)")
+        image_path,  _ = QFileDialog.getOpenFileName(self, "打开图片", "../Train/svm/has/train/",  "Image file (*.jpg)")
         if image_path:
             self.image1 = cv2.imread(image_path, cv2.IMREAD_COLOR)
             self.preprocessimage()
             height, width, _ = self.image1.shape
             self.image1_QImage = QImage(self.image1.data, width, height, width*3, QImage.Format_RGB888)
             self.photo.setPixmap(QPixmap.fromImage(self.image1_QImage))
-            self.getlicense()
-            self.getcharacter()
-            self.getresult()
-    
+            if self.getlicense():
+                self.getcharacter()
+                self.getresult()
+
     def preprocessimage(self):
         height, width, _ = self.image1.shape
         if 300/400 > height/width:
@@ -50,14 +50,18 @@ class MainWindow(QMainWindow,  Ui_MainWindow):
 
     def getlicense(self):
         x, y, w, h, self.image2 = eval.evaluate_one_photo(cv2.cvtColor(self.image1, cv2.COLOR_RGB2BGR))
-        cv2.rectangle(self.image1, (x, y), (x + w, y + h), (255, 0, 0), 5)
-        height, width, _ = self.image1.shape
-        self.image1_QImage = QImage(self.image1.data, width, height, width * 3, QImage.Format_RGB888)
-        self.photo.setPixmap(QPixmap.fromImage(self.image1_QImage))
-        self.image2 = cv2.cvtColor(self.image2, cv2.COLOR_BGR2RGB)
-        height, width, _ = self.image2.shape
-        self.image2_QImage = QImage(self.image2.data, width, height, width * 3, QImage.Format_RGB888)
-        self.license.setPixmap(QPixmap.fromImage(self.image2_QImage))
+        if (x, y, w, h) != (0, 0, 0, 0):
+            cv2.rectangle(self.image1, (x, y), (x + w, y + h), (255, 0, 0), 5)
+            height, width, _ = self.image1.shape
+            self.image1_QImage = QImage(self.image1.data, width, height, width * 3, QImage.Format_RGB888)
+            self.photo.setPixmap(QPixmap.fromImage(self.image1_QImage))
+            self.image2 = cv2.cvtColor(self.image2, cv2.COLOR_BGR2RGB)
+            height, width, _ = self.image2.shape
+            self.image2_QImage = QImage(self.image2.data, width, height, width * 3, QImage.Format_RGB888)
+            self.license.setPixmap(QPixmap.fromImage(self.image2_QImage))
+            return True
+        else:
+            return False
 
     def getcharacter(self):
         self.para = eval.image_to_character2(self.image2)
@@ -92,8 +96,17 @@ class MainWindow(QMainWindow,  Ui_MainWindow):
             self.char6.setPixmap(QPixmap.fromImage(self.char6_QImage))
 
     def getresult(self):
-        self.result_str.append(datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S') + "   " + eval.evaluate_characters(self.para))
-        self.result.insertPlainText(self.result_str[-1] + "\n")
+        temp = eval.evaluate_characters(self.para)
+        self.result_str.append(datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S') + "   " + temp)
+        self.result.setText(temp)
+        self.results.insertPlainText(self.result_str[-1] + "\n")
+        
+    def printresult(self):
+        save_path,  _ = QFileDialog.getSaveFileName(self,  "文件保存",  "C:/Users/Hao/Desktop/",  "Text Files (*.txt)")
+        if save_path:
+            with open(save_path, "w") as f:
+                for index in self.result_str:
+                    f.write(index + "\n")
 
 
 if __name__ == "__main__":

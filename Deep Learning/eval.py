@@ -272,8 +272,8 @@ def evaluate_one_photo(image):
                             return x_, y_, w_, h_, licence
             else:
                 print('No checkpoint file found')
-                return 0, 0, 0, 0, 0
-    return 0, 0, 0, 0, 0
+                return 0, 0, 0, 0, np.array([])
+    return 0, 0, 0, 0, np.array([])
 
 
 def eval(image_path):

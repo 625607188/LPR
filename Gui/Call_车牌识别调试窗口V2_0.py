@@ -1,5 +1,7 @@
 import sys
 import datetime
+import numpy as np
+from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 import cv2
@@ -16,6 +18,7 @@ class MainWindow(QMainWindow,  Ui_MainWindow):
         self.image1 = []
         self.image2 = []
         self.result_str = []
+        self.coordinate = []
         self.image1_QImage = QImage()
         self.image2_QImage = QImage()
         self.char0_QImage = QImage()
@@ -25,6 +28,12 @@ class MainWindow(QMainWindow,  Ui_MainWindow):
         self.char4_QImage = QImage()
         self.char5_QImage = QImage()
         self.char6_QImage = QImage()
+        self.thread_getlicense = GetLicenseThread()
+        self.thread_getlicense.signal_licnese.connect(self.getlicense)
+        self.thread_getcharacter = GetCharacterThread()
+        self.thread_getcharacter.signal_character.connect(self.getcharacter)
+        self.thread_getresult = GetResultThread()
+        self.thread_getresult.signal_result.connect(self.getresult)
         self.setupUi(self)
     
     def getimage(self):
@@ -35,9 +44,7 @@ class MainWindow(QMainWindow,  Ui_MainWindow):
             height, width, _ = self.image1.shape
             self.image1_QImage = QImage(self.image1.data, width, height, width*3, QImage.Format_RGB888)
             self.photo.setPixmap(QPixmap.fromImage(self.image1_QImage))
-            if self.getlicense():
-                self.getcharacter()
-                self.getresult()
+            self.thread_getlicense.getimage(self.image1)
 
     def preprocessimage(self):
         height, width, _ = self.image1.shape
@@ -48,9 +55,9 @@ class MainWindow(QMainWindow,  Ui_MainWindow):
         self.image1 = cv2.resize(self.image1,  (400, 300))
         self.image1 = cv2.cvtColor(self.image1, cv2.COLOR_BGR2RGB)
 
-    def getlicense(self):
-        x, y, w, h, self.image2 = eval.evaluate_one_photo(cv2.cvtColor(self.image1, cv2.COLOR_RGB2BGR))
-        if (x, y, w, h) != (0, 0, 0, 0):
+    def getlicense(self, license):
+        [x, y, w, h, self.image2] = license
+        if [x, y, w, h] != [0, 0, 0, 0]:
             cv2.rectangle(self.image1, (x, y), (x + w, y + h), (255, 0, 0), 5)
             height, width, _ = self.image1.shape
             self.image1_QImage = QImage(self.image1.data, width, height, width * 3, QImage.Format_RGB888)
@@ -59,12 +66,11 @@ class MainWindow(QMainWindow,  Ui_MainWindow):
             height, width, _ = self.image2.shape
             self.image2_QImage = QImage(self.image2.data, width, height, width * 3, QImage.Format_RGB888)
             self.license.setPixmap(QPixmap.fromImage(self.image2_QImage))
-            return True
-        else:
-            return False
 
-    def getcharacter(self):
-        self.para = eval.image_to_character2(self.image2)
+            self.thread_getcharacter.getimage(self.image2)
+
+    def getcharacter(self, character):
+        self.para = character
         width, height = (20,  20)
         self.char0.clear()
         self.char1.clear()
@@ -95,10 +101,11 @@ class MainWindow(QMainWindow,  Ui_MainWindow):
             self.char6_QImage = QImage(self.para[6].data, width, height, QImage.Format_Grayscale8)
             self.char6.setPixmap(QPixmap.fromImage(self.char6_QImage))
 
-    def getresult(self):
-        temp = eval.evaluate_characters(self.para)
-        self.result_str.append(datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S') + "   " + temp)
-        self.result.setText(temp)
+        self.thread_getresult.getimage(self.para)
+
+    def getresult(self, result):
+        self.result_str.append(datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S') + "   " + result)
+        self.result.setText(result)
         self.results.insertPlainText(self.result_str[-1] + "\n")
         
     def printresult(self):
@@ -107,6 +114,54 @@ class MainWindow(QMainWindow,  Ui_MainWindow):
             with open(save_path, "w") as f:
                 for index in self.result_str:
                     f.write(index + "\n")
+
+
+class GetLicenseThread(QThread):
+    signal_licnese = pyqtSignal(list)
+
+    def __init__(self, parent=None):
+        super(GetLicenseThread, self).__init__(parent)
+        self.image = []
+
+    def getimage(self, image):
+        self.image = image
+        self.start()
+
+    def run(self):
+        x, y, w, h, image = eval.evaluate_one_photo(cv2.cvtColor(self.image, cv2.COLOR_RGB2BGR))
+        self.signal_licnese.emit([x, y, w, h, image])
+
+
+class GetCharacterThread(QThread):
+    signal_character = pyqtSignal(list)
+
+    def __init__(self, parent=None):
+        super(GetCharacterThread, self).__init__(parent)
+        self.image = []
+
+    def getimage(self, image):
+        self.image = image
+        self.start()
+
+    def run(self):
+        para = eval.image_to_character2(self.image)
+        self.signal_character.emit(para)
+
+
+class GetResultThread(QThread):
+    signal_result = pyqtSignal(str)
+
+    def __init__(self, parent=None):
+        super(GetResultThread, self).__init__(parent)
+        self.image = []
+
+    def getimage(self, image):
+        self.image = image
+        self.start()
+
+    def run(self):
+        result = eval.evaluate_characters(self.image)
+        self.signal_result.emit(result)
 
 
 if __name__ == "__main__":

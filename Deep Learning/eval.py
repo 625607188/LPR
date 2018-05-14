@@ -10,6 +10,35 @@ import LicenseRecognition
 import inference
 import tfrecord
 
+window1 = []
+window2 = []
+window3 = []
+window4 = []
+window5 = []
+window6 = []
+
+
+def show_debug_window():
+    global window1, window2, window3, window4, window5, window6
+    window1 = cv2.cvtColor(window1, cv2.COLOR_RGB2BGR)
+    plt.subplot(3, 2, 1), plt.imshow(window1)
+    plt.axis('off')
+    window2 = cv2.cvtColor(window2, cv2.COLOR_GRAY2BGR)
+    plt.subplot(3, 2, 3), plt.imshow(window2)
+    plt.axis('off')
+    plt.subplot(3, 2, 5), plt.imshow(window3)
+    plt.axis('off')
+    #window4 = cv2.cvtColor(window4, cv2.COLOR_RGB2BGR)
+    plt.subplot(3, 2, 2), plt.imshow(window4)
+    plt.axis('off')
+    window5 = cv2.cvtColor(window5, cv2.COLOR_GRAY2BGR)
+    plt.subplot(3, 2, 4), plt.imshow(window5)
+    plt.axis('off')
+    window6 = cv2.cvtColor(window6, cv2.COLOR_GRAY2BGR)
+    plt.subplot(3, 2, 6), plt.imshow(window6)
+    plt.axis('off')
+    plt.show()
+
 
 def image_to_character1(image):
     _, image = cv2.threshold(image, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)          # 二值化处理
@@ -62,44 +91,46 @@ def image_to_character1(image):
 
 
 def image_to_character2(image):
+    global window4, window5, window6
+    window4 = image.copy()
+
     image = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
     image = cv2.GaussianBlur(image, (5, 5), 1)
     _, image = cv2.threshold(image, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)            # 二值化处理
     image0 = cv2.equalizeHist(image)                                                        # 均值化处理
 
+    window5 = image0.copy()
+
+    delete = []
     (y, x) = image0.shape
-    column = list(map(sum, image0))  # 删除头和尾的行空白
+    column = list(map(sum, image0))                                                         # 删除头和尾的行空白和白边
     for i in range(y):
-        if column[i] > 255 * 5:
-            start = i
-            break
-    for i in list(range(y - 1, -1, -1)):
-        if column[i] > 255 * 5:
-            end = i
-            break
-    delete = list(range(0, start)) + list(range(end, y))
-    for i in range(y):
-        if column[i] > 255 * x * 4 / 5:
+        if column[i] < 255 * 5:
             delete.append(i)
-    image1 = np.delete(image0, list(set(delete)), axis=0)
+        else:
+            temp = 0
+            for l in range(x):
+                if image0[i][l] != 0:
+                    temp += 1
+                else:
+                    temp = 0
+                if temp > x * 3 / 14:
+                    delete.append(i)
+                    break
+    image1 = np.delete(image0, delete, axis=0)
 
-    '''(y, x) = image1.shape
-    column = list(map(sum, zip(*image1)))  # 删除头和尾的列空白
-    for i in range(x):
-        if column[i] > 0:
-            start = i
-            break
-    for i in list(range(x - 1, -1, -1)):
-        if column[i] > 0:
-            end = i
-            break
-    delete = list(range(0, start)) + list(range(end, x))
-    for i in range(x):
-        if column[i] > 255 * y * 9 / 10:
+    delete = []
+    (y, x) = image1.shape
+    column = list(map(sum, zip(*image1)))                                                   # 删除头和尾的列空白
+    need = list(range(int(x/14))) + list(range(int(x*13/14), x))
+    for i in need:
+        if column[i] < 255 * 5 or column[i] > 255 * y * 9 / 10:
+            print(i)
             delete.append(i)
-    image2 = np.delete(image1, list(set(delete)), axis=1)'''
+    image2 = np.delete(image1, delete, axis=1)
 
-    image2 = image1
+    window6 = image2.copy()
+
     (y, x) = image2.shape
     column = list(map(sum, zip(*image2)))  # 分割字符
     total = sum(column)
@@ -108,9 +139,9 @@ def image_to_character2(image):
     while start < x - 1:
         flag = 0
         for i in range(start, end):
-            if column[i] > 255 * 1:
+            if column[i] > 255 * 3:
                 flag = 1
-            if column[i] < 255 * 1 and flag:
+            if column[i] < 255 * 3 and flag:
                 end = i + 1
                 if end > x:
                     end = x
@@ -133,7 +164,7 @@ def image_to_character2(image):
             para[i] = para[i]
         para[i] = cv2.resize(para[i], (20, 20), interpolation=cv2.INTER_AREA)
 
-    '''for i in range(section):
+    '''for i in range(len(para)):
             plt.subplot(4, 4, i + 1), plt.imshow(para[i])
     plt.show()'''
 
@@ -217,25 +248,39 @@ def evaluate_characters(paragraphs):
 
 
 def evaluate_one_photo(image):
+
+    image1 = image.copy()
+    #image1 = cv2.GaussianBlur(image1, (3, 3), 1)
+
+    global window1, window2, window3
+    window1 = image1.copy()
+
     lower_blue = np.array([100, 43, 46])
     upper_blue = np.array([124, 255, 255])
 
     lower_white = np.array([0, 0, 170])
     upper_white = np.array([180, 30, 255])
 
-    hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
+    hsv = cv2.cvtColor(image1, cv2.COLOR_BGR2HSV)
     # get mask
     mask1 = cv2.inRange(hsv, lower_blue, upper_blue)
     mask2 = cv2.inRange(hsv, lower_white, upper_white)
 
     end = cv2.bitwise_or(mask1, mask2)
 
+    window2 = end.copy()
+    window3 = window2.copy()
+    window3 = cv2.cvtColor(window3, cv2.COLOR_GRAY2BGR)
+
     img, contours, hierarchy = cv2.findContours(end, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
     coordinate = []
+
     for i in contours:
         if len(i) > 50:
             x, y, w, h = cv2.boundingRect(i)
-            coordinate.append([x, y, w, h])
+            if (w/h > 440/160) and (w/h < 440/120):
+                coordinate.append([x+3, y+3, w-6, h-6])
+                cv2.rectangle(window3, (x+3, y+3), (x+w-3, y+h-3), (255, 0, 0), 5)
 
     with tf.Graph().as_default():
         x = tf.placeholder(tf.float32, [None, LicenseRecognition.INPUT_NODE], name='x-input')

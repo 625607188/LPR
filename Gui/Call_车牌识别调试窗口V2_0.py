@@ -37,7 +37,7 @@ class MainWindow(QMainWindow,  Ui_MainWindow):
         self.setupUi(self)
     
     def getimage(self):
-        image_path,  _ = QFileDialog.getOpenFileName(self, "打开图片", "../Train/svm/has/train/",  "Image file (*.jpg)")
+        image_path,  _ = QFileDialog.getOpenFileName(self, "打开图片", "C:/Users/Hao/Desktop/temp/",  "Image file (*.jpg)")
         if image_path:
             self.image1 = cv2.imread(image_path, cv2.IMREAD_COLOR)
             self.preprocessimage()
@@ -107,6 +107,7 @@ class MainWindow(QMainWindow,  Ui_MainWindow):
         self.result_str.append(datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S') + "   " + result)
         self.result.setText(result)
         self.results.insertPlainText(self.result_str[-1] + "\n")
+        eval.show_debug_window()
         
     def printresult(self):
         save_path,  _ = QFileDialog.getSaveFileName(self,  "文件保存",  "C:/Users/Hao/Desktop/",  "Text Files (*.txt)")

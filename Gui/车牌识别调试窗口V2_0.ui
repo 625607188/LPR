@@ -11,7 +11,11 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>MainWindow</string>
+   <string>车牌识别系统</string>
+  </property>
+  <property name="windowIcon">
+   <iconset>
+    <normaloff>../1.ico</normaloff>../1.ico</iconset>
   </property>
   <widget class="QWidget" name="centralWidget">
    <widget class="QGroupBox" name="groupBox">

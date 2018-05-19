@@ -28,7 +28,6 @@ def show_debug_window():
     plt.axis('off')
     plt.subplot(3, 2, 5), plt.imshow(window3)
     plt.axis('off')
-    #window4 = cv2.cvtColor(window4, cv2.COLOR_RGB2BGR)
     plt.subplot(3, 2, 2), plt.imshow(window4)
     plt.axis('off')
     window5 = cv2.cvtColor(window5, cv2.COLOR_GRAY2BGR)
@@ -93,13 +92,20 @@ def image_to_character1(image):
 def image_to_character2(image):
     global window4, window5, window6
     window4 = image.copy()
+    '''cv2.imshow("window4", window4)
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()'''
 
     image = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
-    image = cv2.GaussianBlur(image, (5, 5), 1)
+    image = cv2.GaussianBlur(image, (3, 3), 1)
     _, image = cv2.threshold(image, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)            # 二值化处理
     image0 = cv2.equalizeHist(image)                                                        # 均值化处理
+    _, image = cv2.threshold(image, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)            # 二值化处理
 
     window5 = image0.copy()
+    '''cv2.imshow("window5", window5)
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()'''
 
     delete = []
     (y, x) = image0.shape
@@ -114,7 +120,7 @@ def image_to_character2(image):
                     temp += 1
                 else:
                     temp = 0
-                if temp > x * 3 / 14:
+                if temp > x * 2.5 / 14:
                     delete.append(i)
                     break
     image1 = np.delete(image0, delete, axis=0)
@@ -124,12 +130,15 @@ def image_to_character2(image):
     column = list(map(sum, zip(*image1)))                                                   # 删除头和尾的列空白
     need = list(range(int(x/14))) + list(range(int(x*13/14), x))
     for i in need:
-        if column[i] < 255 * 5 or column[i] > 255 * y * 9 / 10:
+        if column[i] < 255 * 5: # or column[i] > 255 * y * 9 / 10:
             print(i)
             delete.append(i)
     image2 = np.delete(image1, delete, axis=1)
 
     window6 = image2.copy()
+    '''cv2.imshow("window6", window6)
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()'''
 
     (y, x) = image2.shape
     column = list(map(sum, zip(*image2)))  # 分割字符
@@ -139,17 +148,19 @@ def image_to_character2(image):
     while start < x - 1:
         flag = 0
         for i in range(start, end):
-            if column[i] > 255 * 3:
+            if column[i] > 255 * 2:
                 flag = 1
-            if column[i] < 255 * 3 and flag:
+            if column[i] < 255 * 2 and flag:
                 end = i + 1
                 if end > x:
                     end = x
                 break
         para.append([temp[start:end] for temp in image2])
         start, end = (end, x - 1)
+        while column[start] < 255 * 2 and start < end:
+            start += 1
         para[-1] = np.array(para[-1])
-        if para[-1].sum() < total / 7 / 5:
+        if para[-1].sum() < total / 7 / 3:
             del para[-1]
 
     for i in range(len(para)):
@@ -237,7 +248,7 @@ def evaluate_characters(paragraphs):
                 for i in range(len(paragraphs)):
                     xs = sess.run([paragraphs[i]])
                     prediction = int(pre.eval(feed_dict={x: xs, keep_prob: 1.0}))
-                    if 'zh_zhe' == tfrecord.character_classes[prediction]:
+                    if 'zh_zhe' == tfrecord.character_classes[prediction] or i == 0:
                         result = result + '浙'
                     else:
                         result = result + tfrecord.character_classes[prediction]
@@ -254,6 +265,9 @@ def evaluate_one_photo(image):
 
     global window1, window2, window3
     window1 = image1.copy()
+    '''cv2.imshow("window1", window1)
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()'''
 
     lower_blue = np.array([100, 43, 46])
     upper_blue = np.array([124, 255, 255])
@@ -272,15 +286,20 @@ def evaluate_one_photo(image):
     window3 = window2.copy()
     window3 = cv2.cvtColor(window3, cv2.COLOR_GRAY2BGR)
 
+    '''cv2.imshow("window2", window2)
+    cv2.imshow("window3", window3)
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()'''
+
     img, contours, hierarchy = cv2.findContours(end, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
     coordinate = []
 
     for i in contours:
         if len(i) > 50:
             x, y, w, h = cv2.boundingRect(i)
-            if (w/h > 440/160) and (w/h < 440/120):
-                coordinate.append([x+3, y+3, w-6, h-6])
-                cv2.rectangle(window3, (x+3, y+3), (x+w-3, y+h-3), (255, 0, 0), 5)
+            if (w/h > 440/160) and (w/h < 440/100):
+                coordinate.append([x+3, y+5, w-6, h-10])
+                cv2.rectangle(window3, (x+3, y+5), (x+w-3, y+h-5), (255, 0, 0), 5)
 
     with tf.Graph().as_default():
         x = tf.placeholder(tf.float32, [None, LicenseRecognition.INPUT_NODE], name='x-input')

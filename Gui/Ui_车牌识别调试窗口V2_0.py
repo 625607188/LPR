@@ -12,6 +12,9 @@ class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
         MainWindow.resize(741, 422)
+        icon = QtGui.QIcon()
+        icon.addPixmap(QtGui.QPixmap("../1.ico"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        MainWindow.setWindowIcon(icon)
         self.centralWidget = QtWidgets.QWidget(MainWindow)
         self.centralWidget.setObjectName("centralWidget")
         self.groupBox = QtWidgets.QGroupBox(self.centralWidget)
@@ -107,7 +110,7 @@ class Ui_MainWindow(object):
 
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
-        MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
+        MainWindow.setWindowTitle(_translate("MainWindow", "车牌识别系统"))
         self.groupBox.setTitle(_translate("MainWindow", "待识别的图片"))
         self.choose_image.setText(_translate("MainWindow", "选择图片"))
         self.print_result.setText(_translate("MainWindow", "打印结果"))
